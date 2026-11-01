@@ -158,7 +158,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     await show_home(update, context)
 
 
-async def show_voices(target, context: ContextTypes.DEFAULT_TYPE, page: int = 0) -> None:
+async def show_voices(target, context: ContextTypes.DEFAULT_TYPE, user_id: int, page: int = 0) -> None:
     try:
         voices = await asyncio.to_thread(get_voices)
     except Exception as exc:
@@ -175,7 +175,7 @@ async def show_voices(target, context: ContextTypes.DEFAULT_TYPE, page: int = 0)
         return
     total_pages = (len(voices) + PAGE_SIZE - 1) // PAGE_SIZE
     page = max(0, min(page, total_pages - 1))
-    selected = load_voice(target.chat_id and target.from_user.id)
+    selected = load_voice(user_id)
     rows = []
     for index, voice in enumerate(voices[page * PAGE_SIZE:(page + 1) * PAGE_SIZE], start=page * PAGE_SIZE):
         voice_id = str(voice.get("voice_id", ""))
@@ -215,7 +215,7 @@ async def callback_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -
         context.user_data.pop("waiting_for_text", None)
         await query.message.reply_text(home_text(), reply_markup=home_keyboard())
     elif data.startswith("voices:"):
-        await show_voices(query.message, context, int(data.split(":")[1]))
+        await show_voices(query.message, context, query.from_user.id, int(data.split(":")[1]))
     elif data.startswith("select:"):
         try:
             _, raw_index, raw_page = data.split(":")
