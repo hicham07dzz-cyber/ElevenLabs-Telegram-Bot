@@ -1,0 +1,3 @@
+const field=document.getElementById("code");const result=document.getElementById("result");document.getElementById("year").textContent=new Date().getFullYear();
+function verify(){const code=field.value.trim().toUpperCase();result.className="result";if(!code){result.textContent="يرجى إدخال الرمز أولاً.";return;}if(code==="HICHAM100"){result.className="result good";result.textContent="✓ الرمز HICHAM100 مقبول داخل العرض التجريبي الخاص بموقع HICHAM فقط. لا يمنح أي مكافأة في Free Fire.";}else{result.className="result bad";result.textContent="✕ الرمز غير موجود في قائمة الرموز التجريبية لهذا الموقع."}}
+document.getElementById("check").addEventListener("click",verify);field.addEventListener("keydown",e=>{if(e.key==="Enter")verify();});
