@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>FOX GIFT — مولّد الرموز</title>
+<style>
+:root{--bg:#101114;--panel:#1b1d22;--line:#343840;--orange:#ff8b32;--muted:#a8abb3}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 50% 0,#302015,#101114 55%);color:#f6f6f7;font-family:system-ui,Arial;min-height:100vh;display:grid;place-items:center;padding:20px}
+main{width:min(100%,470px);background:#1a1c21;border:1px solid #393b42;border-radius:22px;padding:25px;box-shadow:0 20px 70px #0009}
+.logo{font-weight:900;letter-spacing:3px;color:var(--orange);font-size:25px}.sub{color:var(--muted);margin:5px 0 24px}
+label{display:block;margin:15px 0 7px;color:#ddd;font-size:14px}input{width:100%;padding:14px;border-radius:12px;border:1px solid var(--line);background:#101216;color:white;font-size:16px;outline:none}input:focus{border-color:var(--orange)}
+button{width:100%;padding:14px;border:0;border-radius:12px;background:linear-gradient(90deg,#ff7626,#ffad48);font-weight:800;font-size:16px;margin-top:18px;color:#171717}
+.result{display:none;margin-top:20px;padding:18px;border:1px dashed var(--orange);border-radius:14px;text-align:center;background:#251b15}.token{font-size:30px;font-weight:900;letter-spacing:4px;color:#ffb66b;direction:ltr}.hint,.foot{font-size:12px;color:var(--muted);line-height:1.7}.error{color:#ff7979;margin-top:14px}.nav{display:flex;justify-content:space-between;margin-top:20px;font-size:13px}.nav a{color:#ffad62}.foot{margin-top:22px}
+</style></head>
+<body><main>
+<div class="logo">FOX GIFT</div><div class="sub">مولّد رموز الهدايا التجريبي</div>
+<label for="uid">Player UID</label><input id="uid" inputmode="numeric" maxlength="24" placeholder="أدخل UID اللاعب">
+<label for="gift">Gift Code</label><input id="gift" maxlength="32" placeholder="مثال: FOXWELCOME">
+<button id="make">إنشاء Token ID</button>
+<div id="error" class="error" role="alert"></div>
+<section class="result" id="result"><div class="hint">TOKEN ID</div><div class="token" id="token"></div><div id="reward" class="hint"></div><button id="copy">نسخ الرمز</button></section>
+<div class="nav"><span>FOX GIFT SYSTEM</span><a href="../FOX-GIFT-ADMIN/index.html">لوحة الإدارة</a></div>
+<div class="foot">نسخة تجريبية مستقلة. الرموز والمكافآت افتراضية ومحفوظة محلياً في هذا المتصفح فقط؛ لا تتصل بـ Free Fire ولا تمنح أموالاً أو عناصر داخلها.</div>
+</main>
+<script>
+const $=id=>document.getElementById(id),KEY="foxgift_demo_v1";
+function load(){try{return JSON.parse(localStorage.getItem(KEY)||'{"codes":{},"claims":{}}')}catch{return {codes:{},claims:{}}}}
+async function digest(s){const b=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(s));return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,"0")).join("").toUpperCase()}
+$("make").onclick=async()=>{
+ $("error").textContent="";$("result").style.display="none";
+ const uid=$("uid").value.trim(),code=$("gift").value.trim().toUpperCase();
+ if(!/^\d{5,24}$/.test(uid)){ $("error").textContent="أدخل UID رقمي صحيحاً (5 أرقام على الأقل).";return}
+ const db=load(),item=db.codes[code];
+ if(!item||!item.active){$("error").textContent="الكود غير موجود أو متوقف.";return}
+ if(Date.now()>item.expiresAt){$("error").textContent="انتهت صلاحية هذا الكود.";return}
+ const used=Object.keys(item.claims||{}).length;
+ if(used>=item.maxUses){$("error").textContent="اكتمل عدد الاستخدامات المسموح.";return}
+ if(item.claims&&item.claims[uid]){$("error").textContent="هذا اللاعب استخدم الكود من قبل.";return}
+ const token=(await digest(uid+"|"+code+"|"+item.secret)).slice(0,8);
+ item.claims=item.claims||{};item.claims[uid]={token,at:Date.now()};
+ db.codes[code]=item;localStorage.setItem(KEY,JSON.stringify(db));
+ $("token").textContent=token;$("reward").textContent="المكافأة الافتراضية: "+item.reward+" FOX Credits";
+ $("result").style.display="block";
+};
+$("copy").onclick=()=>navigator.clipboard?.writeText($("token").textContent).then(()=>$("copy").textContent="تم النسخ").catch(()=>{});
+</script></body></html>
