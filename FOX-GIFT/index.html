@@ -1,82 +1,59 @@
 <!doctype html>
-<html lang="en">
+<html lang="ar" dir="rtl">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>FOX GIFT — Festival Giftcode</title>
+<meta name="theme-color" content="#101316">
+<title>FOX GIFT | مركز الهدايا</title>
 <style>
-:root{--gold:#ffd47a;--orange:#ff9a32;--purple:#1d1024;--muted:#b9aab8}
-*{box-sizing:border-box}
-body{margin:0;min-height:100vh;padding:30px 16px;display:grid;place-items:center;color:#ffe5b5;font-family:system-ui,-apple-system,Segoe UI,Arial,sans-serif;background:radial-gradient(ellipse at 50% 15%,#572315 0,transparent 36%),radial-gradient(ellipse at 50% 100%,#351044 0,transparent 42%),#100819;overflow-x:hidden}
-body:before,body:after{content:"✦";position:fixed;color:#ffca6b;text-shadow:0 0 18px #ffad38;font-size:28px;opacity:.8;pointer-events:none}
-body:before{top:16%;left:9%}body:after{top:25%;right:12%;font-size:22px}
-.card{width:min(100%,596px);position:relative;padding:34px 36px 28px;border:1px solid #a86d3b;border-radius:24px;background:linear-gradient(145deg,rgba(42,20,43,.97),rgba(23,13,31,.98));box-shadow:0 22px 80px #0009,inset 0 1px 0 #ffd17b44}
-.card:before{content:"";position:absolute;left:0;right:0;top:0;height:5px;border-radius:24px 24px 0 0;background:linear-gradient(90deg,#7b3c22,#ffd17b,#9c4b1f)}
-.kicker{text-align:center;color:#ffd27a;letter-spacing:3px;font-size:13px;font-weight:800;margin:2px 0 12px}
-h1{text-align:center;font-size:30px;letter-spacing:2px;margin:0;color:#ffe1a2}
-.lamp{text-align:center;font-size:58px;line-height:1.5;filter:drop-shadow(0 0 12px #ff9d32);margin:10px 0}
-h2{text-align:center;font-size:35px;line-height:1.2;margin:0 0 18px;color:#ffe0a0}
-h2 span{color:#ffad36}
-.intro{text-align:center;color:#cbb9c6;line-height:1.8;font-size:15px;margin:0 auto 34px;max-width:470px}
-.section{font-size:14px;letter-spacing:2px;color:#ffd078;font-weight:800;margin-bottom:22px}
-label{display:block;font-size:14px;font-weight:750;color:#f1d6aa;margin:18px 0 10px}
-input{display:block;width:100%;height:62px;border:1px solid #69442f;border-radius:13px;background:#160f1e;color:#fff0d2;padding:0 18px;font-size:17px;outline:none;box-shadow:inset 0 1px 4px #0005}
-input:focus{border-color:#f6b04e;box-shadow:0 0 0 3px #f6b04e22}
-input::placeholder{color:#95848f}
-button{width:100%;height:64px;margin-top:30px;border:1px solid #ffcf79;border-radius:13px;background:linear-gradient(100deg,#b66b1e,#f3a52f,#c87b24);color:#26130c;font-size:18px;font-weight:900;letter-spacing:.3px;box-shadow:0 8px 24px #db812c38;cursor:pointer}
-button:active{transform:translateY(1px)}
-.error{color:#ff9a9a;text-align:center;min-height:22px;margin-top:14px;font-size:14px}
-.result{display:none;margin-top:15px;padding:18px;border:1px dashed #e9ad56;border-radius:14px;background:#211525;text-align:center}
-.result small{color:#d8bd9a;letter-spacing:2px}.token{font-size:30px;font-weight:900;letter-spacing:4px;color:#ffd078;direction:ltr;margin:8px 0}
-.copy{height:44px;margin-top:12px;font-size:14px}
-hr{border:0;border-top:1px solid #63452f;margin:28px 0 18px}
-footer{text-align:center;color:#8f7d8b;font-size:12px;line-height:2;letter-spacing:1px}
-footer strong{color:#e6b86e}
-.links{display:flex;justify-content:center;gap:18px;margin-top:14px;font-size:12px}
-a{color:#ffd078;text-decoration:none}
-.note{margin-top:15px;color:#a997a4;font-size:11px;line-height:1.6;text-align:center}
-@media(max-width:520px){body{padding:18px 12px}.card{padding:28px 20px 24px;border-radius:21px}h1{font-size:25px}h2{font-size:31px}.intro{font-size:14px;margin-bottom:28px}input{height:58px}button{height:60px}}
+:root{color-scheme:dark;--bg:#0b0e10;--panel:#151a1e;--panel2:#1b2227;--line:#303a40;--orange:#ff8b32;--gold:#ffc16b;--muted:#9ca8ae;--white:#f5f7f8;--green:#64d6a0;--red:#ff7777}
+*{box-sizing:border-box}body{margin:0;min-height:100vh;background:radial-gradient(ellipse at 50% -15%,#553019 0,transparent 42%),linear-gradient(145deg,#0b0e10,#11171b 60%,#0b0e10);color:var(--white);font-family:system-ui,-apple-system,"Segoe UI",Arial,sans-serif;padding:22px}
+a{color:var(--gold);text-decoration:none}.shell{width:min(100%,760px);margin:auto}.top{display:flex;align-items:center;justify-content:space-between;gap:14px;margin:8px 0 26px}.brand{display:flex;align-items:center;gap:12px}.mark{width:46px;height:46px;display:grid;place-items:center;border-radius:14px;background:linear-gradient(145deg,#ffb45c,#d95b1d);color:#20140d;font-size:25px;font-weight:1000;box-shadow:0 8px 30px #ff8b3230}.brand b{display:block;letter-spacing:2px;font-size:20px}.brand small{color:var(--muted);font-size:11px;letter-spacing:1.5px}.toplink{border:1px solid var(--line);padding:10px 13px;border-radius:11px;font-size:13px;background:#ffffff08}
+.hero{text-align:center;padding:22px 12px 26px}.eyebrow{display:inline-flex;gap:8px;align-items:center;color:var(--gold);font-size:11px;letter-spacing:2px;font-weight:800}.eyebrow:before,.eyebrow:after{content:"";width:24px;height:1px;background:#a85c2b}.hero h1{font-size:clamp(30px,7vw,48px);line-height:1.12;margin:15px 0 10px;letter-spacing:1px}.hero h1 span{color:var(--orange)}.hero p{color:var(--muted);max-width:490px;margin:0 auto;line-height:1.9;font-size:14px}
+.card{background:linear-gradient(150deg,#1a2024,#12171a);border:1px solid var(--line);border-radius:22px;padding:clamp(20px,5vw,34px);box-shadow:0 22px 70px #0006;position:relative;overflow:hidden}.card:before{content:"";position:absolute;inset:0 0 auto;height:3px;background:linear-gradient(90deg,transparent,var(--orange),var(--gold),transparent)}
+.section-title{font-size:14px;font-weight:850;margin:0 0 20px;display:flex;align-items:center;gap:10px}.section-title:before{content:"";width:4px;height:18px;border-radius:4px;background:var(--orange)}
+.field{margin:17px 0}.field label{display:block;color:#d7dfe2;font-size:13px;font-weight:750;margin-bottom:9px}.field input{width:100%;height:54px;border-radius:12px;border:1px solid #354148;background:#0e1316;color:white;padding:0 15px;font:inherit;outline:none;direction:ltr;text-align:left}.field input:focus{border-color:var(--orange);box-shadow:0 0 0 3px #ff8b3220}.field input::placeholder{color:#68757b}
+button{font:inherit;cursor:pointer}.primary{width:100%;height:56px;border:0;border-radius:12px;background:linear-gradient(100deg,#d96a22,#ffad4d);color:#21150d;font-weight:950;box-shadow:0 9px 25px #ff8b3228;transition:transform .15s,filter .15s}.primary:active{transform:translateY(1px);filter:brightness(.95)}
+.message{min-height:24px;margin:12px 0 0;text-align:center;font-size:13px;color:var(--red)}.result{display:none;margin-top:16px;padding:20px;border:1px solid #8d5b31;border-radius:15px;background:linear-gradient(145deg,#2a211a,#171a1b);text-align:center}.result.show{display:block}.result small{color:var(--gold);font-size:11px;letter-spacing:2px}.token{font-size:clamp(28px,8vw,38px);font-weight:950;letter-spacing:5px;color:#ffd18c;direction:ltr;margin:10px 0}.reward{color:#cbd5d9;font-size:13px}.copy{margin-top:15px;padding:11px 18px;border:1px solid #9a693d;border-radius:10px;background:#ffffff0a;color:var(--gold);font-weight:800}
+.notice{display:flex;gap:11px;align-items:flex-start;margin-top:18px;padding:14px;border:1px solid #59452e;border-radius:13px;background:#ffb34b0a;color:#cbbba6;font-size:12px;line-height:1.8}.notice b{color:var(--gold);white-space:nowrap}
+.footer{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;color:#77858b;font-size:11px;padding:20px 4px 8px}.footer strong{color:#dca064;letter-spacing:1px}
+@media(max-width:520px){body{padding:14px}.top{margin:5px 0 14px}.brand b{font-size:17px}.mark{width:42px;height:42px}.hero{padding:20px 4px}.hero p{font-size:13px}.card{border-radius:17px}}
 </style>
 </head>
 <body>
+<div class="shell">
+<header class="top"><div class="brand"><div class="mark">狐</div><div><b>FOX GIFT</b><small>REWARD CODE CENTER</small></div></div><a class="toplink" href="../">الرئيسية ↗</a></header>
+<section class="hero"><div class="eyebrow">FOX GIFT • COMMUNITY</div><h1>مركز <span>الهدايا</span></h1><p>أدخل معرّف اللاعب ورمز الهدية لإنشاء رقم مطالبة تجريبي والتحقق من شروط الرمز.</p></section>
 <main class="card">
-  <div class="kicker">✦ FESTIVAL OF LIGHTS ✦</div>
-  <h1>🪔 HAPPY DIWALI 🪔</h1>
-  <div class="lamp" aria-hidden="true">🪔</div>
-  <h2>GIFT<span>CODE</span></h2>
-  <p class="intro">Celebrate the festival with FOX GIFT! Enter your Player UID and a valid Gift Code to generate your unique demo Token ID.</p>
-  <div class="section">✦ PLAYER INFORMATION</div>
-  <label for="uid">PLAYER UID</label>
-  <input id="uid" inputmode="numeric" maxlength="24" placeholder="Enter player UID" autocomplete="off">
-  <label for="gift">GIFT CODE</label>
-  <input id="gift" maxlength="32" placeholder="Enter your gift code" autocomplete="off">
-  <button id="make">🪔 GENERATE TOKEN ID</button>
-  <div class="error" id="error" role="alert"></div>
-  <section class="result" id="result"><small>YOUR TOKEN ID</small><div class="token" id="token"></div><div id="reward"></div><button class="copy" id="copy" type="button">COPY TOKEN ID</button></section>
-  <hr>
-  <footer>MADE WITH ❤️ BY <strong>FOX GIFT</strong><br>✦ WISHING YOU A HAPPY AND PROSPEROUS FESTIVAL ✦</footer>
-  <div class="links"><a href="../fox-gift-admin/">ADMIN PANEL</a><a href="../">HOME</a></div>
-  <div class="note">Independent demo only. Codes and FOX Credits are virtual and stored in this browser. This page is not connected to Free Fire or any third-party reward service.</div>
+<h2 class="section-title">بيانات اللاعب</h2>
+<div class="field"><label for="uid">معرّف اللاعب UID</label><input id="uid" inputmode="numeric" maxlength="24" placeholder="أدخل رقم اللاعب" autocomplete="off"></div>
+<div class="field"><label for="gift">رمز الهدية GIFT CODE</label><input id="gift" maxlength="32" placeholder="FOXWELCOME" autocomplete="off"></div>
+<button class="primary" id="make">إنشاء رقم المطالبة</button>
+<div class="message" id="message" role="status" aria-live="polite"></div>
+<section class="result" id="result"><small>DEMO CLAIM TOKEN</small><div class="token" id="token"></div><div class="reward" id="reward"></div><button class="copy" id="copy" type="button">نسخ الرقم</button></section>
+<div class="notice"><b>تنبيه</b><span>هذه نسخة عرض تجريبية فقط. الرموز والأرصدة افتراضية ومحفوظة محلياً في المتصفح نفسه؛ لا يوجد اتصال بخادم أو لعبة خارجية، ولا تمنح هذه الصفحة جواهر أو مكافآت حقيقية.</span></div>
 </main>
+<footer class="footer"><span>© FOX GIFT • DEMO PROJECT</span><strong>BUILT FOR THE COMMUNITY</strong></footer>
+</div>
 <script>
+"use strict";
 const KEY="foxgift_demo_v1", $=id=>document.getElementById(id);
 function load(){try{return JSON.parse(localStorage.getItem(KEY)||'{"codes":{},"claims":{}}')}catch(e){return {codes:{},claims:{}}}}
-async function digest(s){const b=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(s));return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,"0")).join("").toUpperCase()}
+async function digest(value){if(!crypto.subtle)throw new Error("SECURE_CONTEXT_REQUIRED");const data=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(value));return Array.from(new Uint8Array(data),b=>b.toString(16).padStart(2,"0")).join("").toUpperCase()}
+function message(text,error=true){$("message").textContent=text;$("message").style.color=error?"var(--red)":"var(--green)"}
 $("make").addEventListener("click",async()=>{
- $("error").textContent="";$("result").style.display="none";
+ $("result").classList.remove("show");message("");
  const uid=$("uid").value.trim(),code=$("gift").value.trim().toUpperCase();
- if(!/^\d{5,24}$/.test(uid)){$("error").textContent="Please enter a valid numeric Player UID.";return}
- if(!/^[A-Z0-9_-]{4,32}$/.test(code)){$("error").textContent="Please enter a valid Gift Code.";return}
+ if(!/^\d{5,24}$/.test(uid)){message("أدخل UID رقمياً من 5 إلى 24 خانة.");return}
+ if(!/^[A-Z0-9_-]{4,32}$/.test(code)){message("رمز الهدية يجب أن يكون من 4 إلى 32 حرفاً أو رقماً.");return}
  const db=load(),item=db.codes[code];
- if(!item||!item.active){$("error").textContent="Invalid or inactive Gift Code.";return}
- if(Date.now()>item.expiresAt){$("error").textContent="This Gift Code has expired.";return}
+ if(!item||!item.active){message("الرمز غير موجود أو غير مفعّل.");return}
+ if(Date.now()>Number(item.expiresAt)){message("انتهت صلاحية هذا الرمز.");return}
  item.claims=item.claims||{};
- if(item.claims[uid]){$("error").textContent="This Player UID has already used this code.";return}
- if(Object.keys(item.claims).length>=Number(item.maxUses)){$("error").textContent="This Gift Code has reached its usage limit.";return}
- const token=(await digest(uid+"|"+code+"|"+item.secret)).slice(0,8);
- item.claims[uid]={token,at:Date.now()};db.codes[code]=item;localStorage.setItem(KEY,JSON.stringify(db));
- $("token").textContent=token;$("reward").textContent="Demo reward: "+item.reward+" FOX Credits";
- $("result").style.display="block";
+ if(item.claims[uid]){message("استُخدم هذا الرمز مسبقاً مع UID نفسه.");return}
+ if(Object.keys(item.claims).length>=Number(item.maxUses)){message("وصل الرمز إلى الحد الأقصى للاستعمال.");return}
+ try{const token=(await digest(uid+"|"+code+"|"+item.secret)).slice(0,8);item.claims[uid]={token,at:Date.now()};db.codes[code]=item;localStorage.setItem(KEY,JSON.stringify(db));$("token").textContent=token;$("reward").textContent="مكافأة افتراضية: "+Number(item.reward)+" FOX Credits";$("result").classList.add("show");message("تم إنشاء رقم تجريبي بنجاح.",false)}
+ catch(e){message("تعذّر إنشاء الرقم. افتح الصفحة عبر HTTPS ثم أعد المحاولة.")}
 });
-$("copy").addEventListener("click",async()=>{try{await navigator.clipboard.writeText($("token").textContent);$("copy").textContent="COPIED"}catch(e){$("copy").textContent="SELECT TOKEN TO COPY"}});
+$("copy").addEventListener("click",async()=>{const value=$("token").textContent;try{await navigator.clipboard.writeText(value);$("copy").textContent="تم النسخ ✓"}catch(e){$("token").focus?.();$("copy").textContent="حدّد الرقم وانسخه يدوياً"}});
 </script>
 </body></html>
