@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>FOX GIFT ADMIN</title>
+<style>
+:root{--bg:#101114;--panel:#1b1d22;--line:#383b43;--orange:#ff923d;--muted:#a8abb3}*{box-sizing:border-box}body{margin:0;background:#101114;color:#f5f5f6;font-family:system-ui,Arial;padding:20px}.wrap{max-width:900px;margin:auto}.top{display:flex;justify-content:space-between;align-items:center;gap:15px;flex-wrap:wrap}.brand{font-size:25px;font-weight:900;color:var(--orange);letter-spacing:2px}.top a{color:#ffad62}.panel{background:#1b1d22;border:1px solid var(--line);border-radius:18px;padding:20px;margin-top:18px}h2{font-size:18px;margin:0 0 16px}form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:13px}label{font-size:13px;color:#d2d3d7}input{display:block;width:100%;margin-top:6px;padding:12px;border-radius:10px;border:1px solid var(--line);background:#101216;color:white;font-size:15px}button{border:0;border-radius:10px;padding:12px 15px;background:var(--orange);font-weight:800;cursor:pointer}.wide{grid-column:1/-1}.muted{color:var(--muted);font-size:12px;line-height:1.7}.notice{border:1px solid #72502f;background:#2a2118;padding:12px;border-radius:12px;color:#ffd4a7;margin-top:16px;font-size:13px}.list{display:grid;gap:10px}.item{padding:14px;border:1px solid var(--line);border-radius:12px;display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap}.item strong{color:#ffb36c}.actions{display:flex;gap:8px}.secondary{background:#41444c;color:white}.danger{background:#8f3535;color:white}@media(max-width:600px){form{grid-template-columns:1fr}}
+</style></head><body><div class="wrap">
+<div class="top"><div><div class="brand">FOX GIFT ADMIN</div><div class="muted">إدارة أكواد الهدايا التجريبية</div></div><a href="../FOX-GIFT/index.html">فتح المولّد ←</a></div>
+<div class="panel"><h2>إنشاء كود جديد</h2><form id="form">
+<label>Gift Code<input id="code" required maxlength="32" placeholder="FOXWELCOME"></label>
+<label>قيمة المكافأة (FOX Credits)<input id="reward" type="number" min="1" max="1000000" value="500" required></label>
+<label>عدد المستعملين الأقصى<input id="uses" type="number" min="1" max="100000" value="100" required></label>
+<label>مدة الصلاحية بالأيام<input id="days" type="number" min="1" max="365" value="7" required></label>
+<button class="wide">إنشاء وتفعيل الكود</button></form>
+<div class="notice">هذه لوحة تجريبية فقط: لا توجد حماية خادم أو صلاحيات مدير حقيقية. لا تستخدمها لإدارة أموال أو مكافآت حقيقية.</div></div>
+<div class="panel"><h2>الأكواد الحالية</h2><div id="list" class="list"></div><p class="muted">البيانات مشتركة مع صفحة FOX GIFT على نفس المتصفح والنطاق عبر LocalStorage.</p></div>
+</div>
+<script>
+const KEY="foxgift_demo_v1",$=id=>document.getElementById(id);
+function load(){try{return JSON.parse(localStorage.getItem(KEY)||'{"codes":{},"claims":{}}')}catch{return {codes:{},claims:{}}}}
+function save(db){localStorage.setItem(KEY,JSON.stringify(db));render()}
+function esc(s){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
+$("form").onsubmit=e=>{e.preventDefault();const db=load(),code=$("code").value.trim().toUpperCase(),days=Number($("days").value),reward=Number($("reward").value),maxUses=Number($("uses").value);if(!/^[A-Z0-9_-]{4,32}$/.test(code)){alert("استعمل 4 إلى 32 حرفاً أو رقماً.");return}if(db.codes[code]){alert("هذا الكود موجود بالفعل.");return}db.codes[code]={reward,maxUses,expiresAt:Date.now()+days*86400000,active:true,secret:crypto.randomUUID(),claims:{},createdAt:Date.now()};save(db);e.target.reset()};
+function render(){const db=load(),items=Object.entries(db.codes);$("list").innerHTML=items.length?items.map(([code,x])=>{const used=Object.keys(x.claims||{}).length,expired=Date.now()>x.expiresAt;return '<div class="item"><div><strong>'+esc(code)+'</strong><div class="muted">'+x.reward+' Credits · '+used+'/'+x.maxUses+' · '+(expired?'منتهي':new Date(x.expiresAt).toLocaleString())+' · '+(x.active?'فعال':'متوقف')+'</div></div><div class="actions"><button class="secondary" data-toggle="'+esc(code)+'">'+(x.active?'إيقاف':'تفعيل')+'</button><button class="danger" data-delete="'+esc(code)+'">حذف</button></div></div>'}).join(""):'<div class="muted">لا توجد أكواد بعد.</div>'}
+$("list").onclick=e=>{const t=e.target.closest("[data-toggle]"),d=e.target.closest("[data-delete]"),db=load();if(t){const c=t.dataset.toggle;db.codes[c].active=!db.codes[c].active;save(db)}if(d){const c=d.dataset.delete;if(confirm("حذف الكود "+c+"؟")){delete db.codes[c];save(db)}}};
+render();
+</script></body></html>
