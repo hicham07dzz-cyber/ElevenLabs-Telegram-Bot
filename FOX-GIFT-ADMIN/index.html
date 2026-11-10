@@ -1,25 +1,68 @@
 <!doctype html>
-<html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>FOX GIFT ADMIN</title>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#101316">
+<title>FOX GIFT | لوحة التحكم التجريبية</title>
 <style>
-*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 50% 0,#4b2418,#100819 58%);color:#ffe6bd;font-family:system-ui,Arial;padding:22px}.wrap{max-width:900px;margin:auto}.top{display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap}.brand{font-size:26px;font-weight:950;color:#ffb34e;letter-spacing:2px}.muted{color:#b9aab8;font-size:12px;line-height:1.8}.top a{color:#ffd078;text-decoration:none}.panel{background:#211426;border:1px solid #79502f;border-radius:18px;padding:22px;margin-top:18px;box-shadow:0 12px 40px #0005}h2{font-size:19px;margin:0 0 17px;color:#ffd078}form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}label{font-size:13px;color:#f1d6aa}input{display:block;width:100%;margin-top:7px;padding:13px;border-radius:10px;border:1px solid #69442f;background:#160f1e;color:white;font-size:15px}button{border:0;border-radius:10px;padding:12px 15px;background:linear-gradient(90deg,#c77b27,#f5b24c);font-weight:850;cursor:pointer}.wide{grid-column:1/-1}.notice{border:1px solid #805c36;background:#332316;padding:12px;border-radius:12px;color:#ffd6a0;margin-top:16px;font-size:13px}.list{display:grid;gap:10px}.item{padding:14px;border:1px solid #61432f;border-radius:12px;display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap}.item strong{color:#ffca78}.actions{display:flex;gap:8px}.secondary{background:#4a414b;color:white}.danger{background:#8f3535;color:white}@media(max-width:600px){form{grid-template-columns:1fr}.panel{padding:17px}}
-</style></head><body><div class="wrap">
-<div class="top"><div><div class="brand">FOX GIFT ADMIN</div><div class="muted">لوحة إدارة أكواد الهدايا التجريبية</div></div><a href="../fox-gift/">فتح المولّد ←</a></div>
-<div class="panel"><h2>إنشاء كود جديد</h2><form id="form">
-<label>Gift Code<input id="code" required maxlength="32" placeholder="FOXWELCOME"></label>
-<label>قيمة المكافأة (FOX Credits)<input id="reward" type="number" min="1" max="1000000" value="500" required></label>
-<label>عدد المستعملين الأقصى<input id="uses" type="number" min="1" max="100000" value="100" required></label>
-<label>مدة الصلاحية بالأيام<input id="days" type="number" min="1" max="365" value="7" required></label>
-<button class="wide">إنشاء وتفعيل الكود</button></form>
-<div class="notice">ملاحظة: هذه نسخة تجريبية؛ لا توجد قاعدة بيانات أو صلاحيات مدير على الخادم. الأكواد والمكافآت افتراضية فقط.</div></div>
-<div class="panel"><h2>الأكواد الحالية</h2><div id="list" class="list"></div><p class="muted">تقرأ صفحة المولّد ولوحة الإدارة نفس البيانات من المفتاح نفسه في LocalStorage وعلى نفس المتصفح.</p></div>
+:root{color-scheme:dark;--bg:#0b0e10;--panel:#151a1e;--panel2:#1c2328;--line:#303a40;--orange:#ff8b32;--gold:#ffc16b;--muted:#9ca8ae;--white:#f5f7f8;--green:#64d6a0;--red:#ff7777}
+*{box-sizing:border-box}body{margin:0;min-height:100vh;background:radial-gradient(ellipse at 50% -15%,#553019 0,transparent 42%),linear-gradient(145deg,#0b0e10,#11171b 60%,#0b0e10);color:var(--white);font-family:system-ui,-apple-system,"Segoe UI",Arial,sans-serif;padding:20px}
+a{color:var(--gold);text-decoration:none}.shell{width:min(100%,980px);margin:auto}.top{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;margin:8px 0 25px}.brand{display:flex;align-items:center;gap:12px}.mark{width:46px;height:46px;display:grid;place-items:center;border-radius:14px;background:linear-gradient(145deg,#ffb45c,#d95b1d);color:#20140d;font-size:25px;font-weight:1000}.brand b{display:block;letter-spacing:2px;font-size:20px}.brand small{color:var(--muted);font-size:11px;letter-spacing:1.5px}.nav{display:flex;gap:9px;flex-wrap:wrap}.nav a{border:1px solid var(--line);padding:10px 13px;border-radius:11px;font-size:13px;background:#ffffff08}
+.heading{margin:12px 0 22px}.eyebrow{color:var(--gold);font-size:11px;letter-spacing:2px;font-weight:850}.heading h1{font-size:clamp(25px,5vw,36px);margin:8px 0}.heading p{color:var(--muted);font-size:13px;line-height:1.8;margin:0}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:18px 0}.stat{background:linear-gradient(145deg,#1a2024,#12171a);border:1px solid var(--line);border-radius:15px;padding:17px}.stat small{color:var(--muted);font-size:12px}.stat strong{display:block;font-size:27px;color:var(--gold);margin-top:5px}
+.panel{background:linear-gradient(150deg,#1a2024,#12171a);border:1px solid var(--line);border-radius:18px;padding:clamp(17px,3vw,25px);margin-top:16px;box-shadow:0 15px 45px #0004;position:relative;overflow:hidden}.panel:before{content:"";position:absolute;inset:0 0 auto;height:2px;background:linear-gradient(90deg,transparent,var(--orange),transparent)}h2{font-size:15px;margin:0 0 19px;display:flex;align-items:center;gap:10px}h2:before{content:"";width:4px;height:17px;border-radius:4px;background:var(--orange)}
+form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}.field label{display:block;font-size:12px;color:#d7dfe2;font-weight:750;margin-bottom:8px}.field input{width:100%;height:48px;border:1px solid #354148;border-radius:10px;background:#0e1316;color:white;padding:0 12px;font:inherit;outline:none}.field input:focus{border-color:var(--orange);box-shadow:0 0 0 3px #ff8b3220}.wide{grid-column:1/-1}
+button{font:inherit;cursor:pointer;border-radius:10px;font-weight:850}.create{height:49px;border:0;background:linear-gradient(100deg,#d96a22,#ffad4d);color:#21150d}.status{min-height:20px;color:var(--green);font-size:12px;margin-top:12px}
+.notice{padding:13px;border:1px solid #59452e;border-radius:12px;background:#ffb34b0a;color:#cbbba6;font-size:12px;line-height:1.8;margin-top:15px}.notice b{color:var(--gold)}
+.list{display:grid;gap:10px}.empty{padding:22px;text-align:center;color:var(--muted);border:1px dashed var(--line);border-radius:12px;font-size:13px}.item{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;padding:15px;border:1px solid var(--line);border-radius:13px;background:#ffffff04}.code{font-weight:950;letter-spacing:1.5px;color:var(--gold);direction:ltr;text-align:right}.meta{font-size:11px;color:var(--muted);line-height:1.9;margin-top:5px}.pill{display:inline-block;padding:3px 8px;border-radius:20px;font-size:10px;font-weight:800;margin-inline-start:6px}.active{background:#64d6a018;color:var(--green)}.paused{background:#ff777718;color:var(--red)}.actions{display:flex;gap:7px}.action{padding:9px 12px;border:1px solid var(--line);background:#ffffff08;color:#e8edef;font-size:11px}.delete{border-color:#793b3b;color:#ff9999}.footer{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;color:#77858b;font-size:11px;padding:20px 4px 8px}
+@media(max-width:600px){body{padding:13px}.brand b{font-size:17px}.mark{width:42px;height:42px}.stats{gap:8px}.stat{padding:12px}.stat strong{font-size:22px}form{grid-template-columns:1fr}.wide{grid-column:auto}.item{align-items:flex-start}.actions{width:100%}.action{flex:1}}
+</style>
+</head>
+<body><div class="shell">
+<header class="top"><div class="brand"><div class="mark">狐</div><div><b>FOX GIFT</b><small>CONTROL PANEL • DEMO</small></div></div><nav class="nav"><a href="../fox-gift/">فتح المولّد ↗</a><a href="../">الرئيسية</a></nav></header>
+<section class="heading"><div class="eyebrow">MANAGEMENT SPACE</div><h1>لوحة إدارة الرموز</h1><p>إنشاء رموز تجريبية ومتابعة صلاحيتها وعدد مرات استخدامها.</p></section>
+<section class="stats"><div class="stat"><small>إجمالي الرموز</small><strong id="total">0</strong></div><div class="stat"><small>الرموز الفعّالة</small><strong id="enabled">0</strong></div><div class="stat"><small>إجمالي المطالبات</small><strong id="claims">0</strong></div></section>
+<section class="panel"><h2>إنشاء رمز جديد</h2>
+<form id="form">
+<div class="field"><label for="code">رمز الهدية</label><input id="code" required maxlength="32" placeholder="FOXWELCOME" dir="ltr" autocomplete="off"></div>
+<div class="field"><label for="reward">المكافأة الافتراضية (FOX Credits)</label><input id="reward" type="number" min="1" max="1000000" value="500" required></div>
+<div class="field"><label for="uses">الحد الأقصى للمستخدمين</label><input id="uses" type="number" min="1" max="100000" value="100" required></div>
+<div class="field"><label for="days">الصلاحية بالأيام</label><input id="days" type="number" min="1" max="365" value="7" required></div>
+<button class="create wide" type="submit">＋ إنشاء وتفعيل الرمز</button>
+</form><div class="status" id="status" role="status" aria-live="polite"></div>
+<div class="notice"><b>مهم:</b> هذه لوحة عرض تجريبية وليست نظام إدارة آمناً. لا يوجد خادم أو تسجيل دخول أو قاعدة بيانات مشتركة؛ البيانات محفوظة في LocalStorage على هذا المتصفح فقط. لا تستخدمها لإدارة مكافآت حقيقية أو بيانات لاعبين حساسة.</div>
+</section>
+<section class="panel"><h2>قائمة الرموز</h2><div class="list" id="list"></div></section>
+<footer class="footer"><span>FOX GIFT • DEMO ADMIN</span><span>Local browser storage only</span></footer>
 </div>
 <script>
+"use strict";
 const KEY="foxgift_demo_v1",$=id=>document.getElementById(id);
 function load(){try{return JSON.parse(localStorage.getItem(KEY)||'{"codes":{},"claims":{}}')}catch(e){return {codes:{},claims:{}}}}
 function save(db){localStorage.setItem(KEY,JSON.stringify(db));render()}
-function esc(s){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
-$("form").onsubmit=e=>{e.preventDefault();const db=load(),code=$("code").value.trim().toUpperCase(),days=Number($("days").value),reward=Number($("reward").value),maxUses=Number($("uses").value);if(!/^[A-Z0-9_-]{4,32}$/.test(code)){alert("استعمل 4 إلى 32 حرفاً أو رقماً.");return}if(db.codes[code]){alert("هذا الكود موجود بالفعل.");return}db.codes[code]={reward,maxUses,expiresAt:Date.now()+days*86400000,active:true,secret:crypto.randomUUID(),claims:{},createdAt:Date.now()};save(db);e.target.reset()};
-function render(){const db=load(),items=Object.entries(db.codes);$("list").innerHTML=items.length?items.map(([code,x])=>{const used=Object.keys(x.claims||{}).length,expired=Date.now()>x.expiresAt;return '<div class="item"><div><strong>'+esc(code)+'</strong><div class="muted">'+x.reward+' Credits · '+used+'/'+x.maxUses+' · '+(expired?'منتهي':new Date(x.expiresAt).toLocaleString())+' · '+(x.active?'فعال':'متوقف')+'</div></div><div class="actions"><button class="secondary" data-toggle="'+esc(code)+'">'+(x.active?'إيقاف':'تفعيل')+'</button><button class="danger" data-delete="'+esc(code)+'">حذف</button></div></div>'}).join(""):'<div class="muted">لا توجد أكواد بعد.</div>'}
-$("list").onclick=e=>{const t=e.target.closest("[data-toggle]"),d=e.target.closest("[data-delete]"),db=load();if(t){const c=t.dataset.toggle;db.codes[c].active=!db.codes[c].active;save(db)}if(d){const c=d.dataset.delete;if(confirm("حذف الكود "+c+"؟")){delete db.codes[c];save(db)}}};
+function esc(value){return String(value).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
+function render(){
+ const db=load(),entries=Object.entries(db.codes||{});let claims=0;
+ for(const [,item] of entries)claims+=Object.keys(item.claims||{}).length;
+ $("total").textContent=entries.length;$("enabled").textContent=entries.filter(([,x])=>x.active&&Date.now()<=Number(x.expiresAt)).length;$("claims").textContent=claims;
+ $("list").innerHTML=entries.length?entries.map(([code,x])=>{
+  const used=Object.keys(x.claims||{}).length,expired=Date.now()>Number(x.expiresAt),on=!!x.active&&!expired;
+  const expiry=new Date(Number(x.expiresAt)).toLocaleDateString("ar");
+  return '<article class="item"><div><div class="code">'+esc(code)+'</div><div class="meta">'+Number(x.reward)+' FOX Credits · '+used+'/'+Number(x.maxUses)+' استعمال · ينتهي '+esc(expiry)+' <span class="pill '+(on?'active':'paused')+'">'+(expired?'منتهي':on?'فعّال':'متوقف')+'</span></div></div><div class="actions"><button class="action" type="button" data-toggle="'+esc(code)+'">'+(x.active?'إيقاف':'تفعيل')+'</button><button class="action delete" type="button" data-delete="'+esc(code)+'">حذف</button></div></article>'
+ }).join(""):'<div class="empty">لا توجد رموز حالياً. أنشئ أول رمز من النموذج أعلاه.</div>';
+}
+$("form").addEventListener("submit",e=>{
+ e.preventDefault();const db=load(),code=$("code").value.trim().toUpperCase(),days=Number($("days").value),reward=Number($("reward").value),maxUses=Number($("uses").value);
+ if(!/^[A-Z0-9_-]{4,32}$/.test(code)){$("status").textContent="استخدم 4 إلى 32 حرفاً أو رقماً أو - أو _.";return}
+ if(db.codes[code]){$("status").textContent="هذا الرمز موجود بالفعل.";return}
+ if(!Number.isInteger(days)||days<1||days>365||!Number.isInteger(reward)||reward<1||reward>1000000||!Number.isInteger(maxUses)||maxUses<1||maxUses>100000){$("status").textContent="تحقق من القيم المدخلة.";return}
+ db.codes[code]={reward,maxUses,expiresAt:Date.now()+days*86400000,active:true,secret:crypto.randomUUID(),claims:{},createdAt:Date.now()};
+ save(db);$("form").reset();$("reward").value=500;$("uses").value=100;$("days").value=7;$("status").textContent="تم إنشاء الرمز التجريبي.";
+});
+$("list").addEventListener("click",e=>{
+ const toggle=e.target.closest("[data-toggle]"),del=e.target.closest("[data-delete]");if(!toggle&&!del)return;
+ const db=load();
+ if(toggle){const code=toggle.dataset.toggle;if(!db.codes[code])return;db.codes[code].active=!db.codes[code].active;save(db)}
+ if(del){const code=del.dataset.delete;if(!db.codes[code])return;if(confirm("حذف الرمز "+code+" من بيانات هذا المتصفح؟")){delete db.codes[code];save(db)}}
+});
 window.addEventListener("storage",render);render();
 </script></body></html>
