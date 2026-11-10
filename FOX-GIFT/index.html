@@ -1,46 +1,82 @@
 <!doctype html>
-<html lang="ar" dir="rtl">
+<html lang="en">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>FOX GIFT — مولّد الرموز</title>
+<title>FOX GIFT — Festival Giftcode</title>
 <style>
-:root{--bg:#101114;--panel:#1b1d22;--line:#343840;--orange:#ff8b32;--muted:#a8abb3}
-*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 50% 0,#302015,#101114 55%);color:#f6f6f7;font-family:system-ui,Arial;min-height:100vh;display:grid;place-items:center;padding:20px}
-main{width:min(100%,470px);background:#1a1c21;border:1px solid #393b42;border-radius:22px;padding:25px;box-shadow:0 20px 70px #0009}
-.logo{font-weight:900;letter-spacing:3px;color:var(--orange);font-size:25px}.sub{color:var(--muted);margin:5px 0 24px}
-label{display:block;margin:15px 0 7px;color:#ddd;font-size:14px}input{width:100%;padding:14px;border-radius:12px;border:1px solid var(--line);background:#101216;color:white;font-size:16px;outline:none}input:focus{border-color:var(--orange)}
-button{width:100%;padding:14px;border:0;border-radius:12px;background:linear-gradient(90deg,#ff7626,#ffad48);font-weight:800;font-size:16px;margin-top:18px;color:#171717}
-.result{display:none;margin-top:20px;padding:18px;border:1px dashed var(--orange);border-radius:14px;text-align:center;background:#251b15}.token{font-size:30px;font-weight:900;letter-spacing:4px;color:#ffb66b;direction:ltr}.hint,.foot{font-size:12px;color:var(--muted);line-height:1.7}.error{color:#ff7979;margin-top:14px}.nav{display:flex;justify-content:space-between;margin-top:20px;font-size:13px}.nav a{color:#ffad62}.foot{margin-top:22px}
-</style></head>
-<body><main>
-<div class="logo">FOX GIFT</div><div class="sub">مولّد رموز الهدايا التجريبي</div>
-<label for="uid">Player UID</label><input id="uid" inputmode="numeric" maxlength="24" placeholder="أدخل UID اللاعب">
-<label for="gift">Gift Code</label><input id="gift" maxlength="32" placeholder="مثال: FOXWELCOME">
-<button id="make">إنشاء Token ID</button>
-<div id="error" class="error" role="alert"></div>
-<section class="result" id="result"><div class="hint">TOKEN ID</div><div class="token" id="token"></div><div id="reward" class="hint"></div><button id="copy">نسخ الرمز</button></section>
-<div class="nav"><span>FOX GIFT SYSTEM</span><a href="../FOX-GIFT-ADMIN/index.html">لوحة الإدارة</a></div>
-<div class="foot">نسخة تجريبية مستقلة. الرموز والمكافآت افتراضية ومحفوظة محلياً في هذا المتصفح فقط؛ لا تتصل بـ Free Fire ولا تمنح أموالاً أو عناصر داخلها.</div>
+:root{--gold:#ffd47a;--orange:#ff9a32;--purple:#1d1024;--muted:#b9aab8}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;padding:30px 16px;display:grid;place-items:center;color:#ffe5b5;font-family:system-ui,-apple-system,Segoe UI,Arial,sans-serif;background:radial-gradient(ellipse at 50% 15%,#572315 0,transparent 36%),radial-gradient(ellipse at 50% 100%,#351044 0,transparent 42%),#100819;overflow-x:hidden}
+body:before,body:after{content:"✦";position:fixed;color:#ffca6b;text-shadow:0 0 18px #ffad38;font-size:28px;opacity:.8;pointer-events:none}
+body:before{top:16%;left:9%}body:after{top:25%;right:12%;font-size:22px}
+.card{width:min(100%,596px);position:relative;padding:34px 36px 28px;border:1px solid #a86d3b;border-radius:24px;background:linear-gradient(145deg,rgba(42,20,43,.97),rgba(23,13,31,.98));box-shadow:0 22px 80px #0009,inset 0 1px 0 #ffd17b44}
+.card:before{content:"";position:absolute;left:0;right:0;top:0;height:5px;border-radius:24px 24px 0 0;background:linear-gradient(90deg,#7b3c22,#ffd17b,#9c4b1f)}
+.kicker{text-align:center;color:#ffd27a;letter-spacing:3px;font-size:13px;font-weight:800;margin:2px 0 12px}
+h1{text-align:center;font-size:30px;letter-spacing:2px;margin:0;color:#ffe1a2}
+.lamp{text-align:center;font-size:58px;line-height:1.5;filter:drop-shadow(0 0 12px #ff9d32);margin:10px 0}
+h2{text-align:center;font-size:35px;line-height:1.2;margin:0 0 18px;color:#ffe0a0}
+h2 span{color:#ffad36}
+.intro{text-align:center;color:#cbb9c6;line-height:1.8;font-size:15px;margin:0 auto 34px;max-width:470px}
+.section{font-size:14px;letter-spacing:2px;color:#ffd078;font-weight:800;margin-bottom:22px}
+label{display:block;font-size:14px;font-weight:750;color:#f1d6aa;margin:18px 0 10px}
+input{display:block;width:100%;height:62px;border:1px solid #69442f;border-radius:13px;background:#160f1e;color:#fff0d2;padding:0 18px;font-size:17px;outline:none;box-shadow:inset 0 1px 4px #0005}
+input:focus{border-color:#f6b04e;box-shadow:0 0 0 3px #f6b04e22}
+input::placeholder{color:#95848f}
+button{width:100%;height:64px;margin-top:30px;border:1px solid #ffcf79;border-radius:13px;background:linear-gradient(100deg,#b66b1e,#f3a52f,#c87b24);color:#26130c;font-size:18px;font-weight:900;letter-spacing:.3px;box-shadow:0 8px 24px #db812c38;cursor:pointer}
+button:active{transform:translateY(1px)}
+.error{color:#ff9a9a;text-align:center;min-height:22px;margin-top:14px;font-size:14px}
+.result{display:none;margin-top:15px;padding:18px;border:1px dashed #e9ad56;border-radius:14px;background:#211525;text-align:center}
+.result small{color:#d8bd9a;letter-spacing:2px}.token{font-size:30px;font-weight:900;letter-spacing:4px;color:#ffd078;direction:ltr;margin:8px 0}
+.copy{height:44px;margin-top:12px;font-size:14px}
+hr{border:0;border-top:1px solid #63452f;margin:28px 0 18px}
+footer{text-align:center;color:#8f7d8b;font-size:12px;line-height:2;letter-spacing:1px}
+footer strong{color:#e6b86e}
+.links{display:flex;justify-content:center;gap:18px;margin-top:14px;font-size:12px}
+a{color:#ffd078;text-decoration:none}
+.note{margin-top:15px;color:#a997a4;font-size:11px;line-height:1.6;text-align:center}
+@media(max-width:520px){body{padding:18px 12px}.card{padding:28px 20px 24px;border-radius:21px}h1{font-size:25px}h2{font-size:31px}.intro{font-size:14px;margin-bottom:28px}input{height:58px}button{height:60px}}
+</style>
+</head>
+<body>
+<main class="card">
+  <div class="kicker">✦ FESTIVAL OF LIGHTS ✦</div>
+  <h1>🪔 HAPPY DIWALI 🪔</h1>
+  <div class="lamp" aria-hidden="true">🪔</div>
+  <h2>GIFT<span>CODE</span></h2>
+  <p class="intro">Celebrate the festival with FOX GIFT! Enter your Player UID and a valid Gift Code to generate your unique demo Token ID.</p>
+  <div class="section">✦ PLAYER INFORMATION</div>
+  <label for="uid">PLAYER UID</label>
+  <input id="uid" inputmode="numeric" maxlength="24" placeholder="Enter player UID" autocomplete="off">
+  <label for="gift">GIFT CODE</label>
+  <input id="gift" maxlength="32" placeholder="Enter your gift code" autocomplete="off">
+  <button id="make">🪔 GENERATE TOKEN ID</button>
+  <div class="error" id="error" role="alert"></div>
+  <section class="result" id="result"><small>YOUR TOKEN ID</small><div class="token" id="token"></div><div id="reward"></div><button class="copy" id="copy" type="button">COPY TOKEN ID</button></section>
+  <hr>
+  <footer>MADE WITH ❤️ BY <strong>FOX GIFT</strong><br>✦ WISHING YOU A HAPPY AND PROSPEROUS FESTIVAL ✦</footer>
+  <div class="links"><a href="../fox-gift-admin/">ADMIN PANEL</a><a href="../">HOME</a></div>
+  <div class="note">Independent demo only. Codes and FOX Credits are virtual and stored in this browser. This page is not connected to Free Fire or any third-party reward service.</div>
 </main>
 <script>
-const $=id=>document.getElementById(id),KEY="foxgift_demo_v1";
-function load(){try{return JSON.parse(localStorage.getItem(KEY)||'{"codes":{},"claims":{}}')}catch{return {codes:{},claims:{}}}}
+const KEY="foxgift_demo_v1", $=id=>document.getElementById(id);
+function load(){try{return JSON.parse(localStorage.getItem(KEY)||'{"codes":{},"claims":{}}')}catch(e){return {codes:{},claims:{}}}}
 async function digest(s){const b=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(s));return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,"0")).join("").toUpperCase()}
-$("make").onclick=async()=>{
+$("make").addEventListener("click",async()=>{
  $("error").textContent="";$("result").style.display="none";
  const uid=$("uid").value.trim(),code=$("gift").value.trim().toUpperCase();
- if(!/^\d{5,24}$/.test(uid)){ $("error").textContent="أدخل UID رقمي صحيحاً (5 أرقام على الأقل).";return}
+ if(!/^\d{5,24}$/.test(uid)){$("error").textContent="Please enter a valid numeric Player UID.";return}
+ if(!/^[A-Z0-9_-]{4,32}$/.test(code)){$("error").textContent="Please enter a valid Gift Code.";return}
  const db=load(),item=db.codes[code];
- if(!item||!item.active){$("error").textContent="الكود غير موجود أو متوقف.";return}
- if(Date.now()>item.expiresAt){$("error").textContent="انتهت صلاحية هذا الكود.";return}
- const used=Object.keys(item.claims||{}).length;
- if(used>=item.maxUses){$("error").textContent="اكتمل عدد الاستخدامات المسموح.";return}
- if(item.claims&&item.claims[uid]){$("error").textContent="هذا اللاعب استخدم الكود من قبل.";return}
+ if(!item||!item.active){$("error").textContent="Invalid or inactive Gift Code.";return}
+ if(Date.now()>item.expiresAt){$("error").textContent="This Gift Code has expired.";return}
+ item.claims=item.claims||{};
+ if(item.claims[uid]){$("error").textContent="This Player UID has already used this code.";return}
+ if(Object.keys(item.claims).length>=Number(item.maxUses)){$("error").textContent="This Gift Code has reached its usage limit.";return}
  const token=(await digest(uid+"|"+code+"|"+item.secret)).slice(0,8);
- item.claims=item.claims||{};item.claims[uid]={token,at:Date.now()};
- db.codes[code]=item;localStorage.setItem(KEY,JSON.stringify(db));
- $("token").textContent=token;$("reward").textContent="المكافأة الافتراضية: "+item.reward+" FOX Credits";
+ item.claims[uid]={token,at:Date.now()};db.codes[code]=item;localStorage.setItem(KEY,JSON.stringify(db));
+ $("token").textContent=token;$("reward").textContent="Demo reward: "+item.reward+" FOX Credits";
  $("result").style.display="block";
-};
-$("copy").onclick=()=>navigator.clipboard?.writeText($("token").textContent).then(()=>$("copy").textContent="تم النسخ").catch(()=>{});
-</script></body></html>
+});
+$("copy").addEventListener("click",async()=>{try{await navigator.clipboard.writeText($("token").textContent);$("copy").textContent="COPIED"}catch(e){$("copy").textContent="SELECT TOKEN TO COPY"}});
+</script>
+</body></html>
