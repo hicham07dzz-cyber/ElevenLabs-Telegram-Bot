@@ -5,7 +5,7 @@ from http.server import ThreadingHTTPServer, SimpleHTTPRequestHandler
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent
-DB = ROOT / "foxgift.sqlite3"
+DB = Path.home() / ".foxgift_room.sqlite3"
 ADMIN_KEY = os.environ.get("FOXGIFT_ADMIN_KEY", "")
 HOST = os.environ.get("FOXGIFT_HOST", "127.0.0.1")
 PORT = int(os.environ.get("FOXGIFT_PORT", "8765"))
