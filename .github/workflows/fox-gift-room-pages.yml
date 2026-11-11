@@ -1,0 +1,65 @@
+name: Deploy FOX GIFT ROOM and existing FOX GIFT pages
+
+on:
+  push:
+    branches:
+      - fox-gift-room-system
+    paths:
+      - 'FOX-GIFT-ROOM/**'
+      - 'FOX-GIFT/**'
+      - 'FOX-GIFT-ADMIN/**'
+      - '.github/workflows/fox-gift-room-pages.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: github-pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Prepare site
+        run: |
+          mkdir -p _site/fox-gift _site/fox-gift-admin _site/fox-gift-room
+          cp FOX-GIFT/index.html _site/fox-gift/index.html
+          cp FOX-GIFT-ADMIN/index.html _site/fox-gift-admin/index.html
+          cp FOX-GIFT-ROOM/index.html _site/fox-gift-room/index.html
+          cp FOX-GIFT-ROOM/admin.html _site/fox-gift-room/admin.html
+          cat > _site/index.html <<'EOF'
+          <!doctype html>
+          <html lang="ar" dir="rtl">
+          <meta charset="utf-8">
+          <meta name="viewport" content="width=device-width,initial-scale=1">
+          <title>FOX GIFT</title>
+          <body style="background:#101114;color:white;font-family:system-ui;text-align:center;padding:40px">
+            <h1 style="color:#ff923d">FOX GIFT</h1>
+            <p><a style="color:#ffb36c" href="./fox-gift/">FOX GIFT</a></p>
+            <p><a style="color:#ffb36c" href="./fox-gift-admin/">FOX GIFT ADMIN</a></p>
+            <p><a style="color:#ffb36c" href="./fox-gift-room/">FOX GIFT ROOM</a></p>
+          </body>
+          </html>
+          EOF
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
