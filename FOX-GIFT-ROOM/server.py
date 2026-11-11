@@ -76,7 +76,7 @@ class Handler(SimpleHTTPRequestHandler):
             if self.path=="/api/claim":
                 uid=str(data.get("uid","")).strip()
                 code=str(data.get("code","")).strip().upper()
-                if not re.fullmatch(r"\\d{5,24}",uid) or not re.fullmatch(r"[A-Z0-9_-]{4,32}",code):
+                if not re.fullmatch(r"\d{5,24}",uid) or not re.fullmatch(r"[A-Z0-9_-]{4,32}",code):
                     return self.send_json(400,{"error":"UID أو كود الهدية غير صالح."})
                 now=int(time.time())
                 with connect() as c:
