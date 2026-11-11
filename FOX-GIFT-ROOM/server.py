@@ -28,7 +28,7 @@ def init_db():
         CREATE TABLE IF NOT EXISTS wallets(uid TEXT PRIMARY KEY,balance INTEGER NOT NULL DEFAULT 0);
         CREATE TABLE IF NOT EXISTS claims(
           id INTEGER PRIMARY KEY AUTOINCREMENT,code TEXT NOT NULL,uid TEXT NOT NULL,
-          token_id TEXT NOT NULL,credits INTEGER NOT NULL,created_at INTEGER NOT NULL,
+          receipt TEXT NOT NULL UNIQUE,token_id TEXT NOT NULL,credits INTEGER NOT NULL,created_at INTEGER NOT NULL,
           UNIQUE(code,uid),FOREIGN KEY(code) REFERENCES codes(code)
         );
         """)
@@ -91,7 +91,7 @@ class Handler(SimpleHTTPRequestHandler):
                     first_five=int(uid[:5])
                     token_id=str(first_five*gift["multiplier"]+4921)[:5].zfill(5)
                     c.execute("INSERT INTO wallets(uid,balance) VALUES(?,?) ON CONFLICT(uid) DO UPDATE SET balance=balance+excluded.balance",(uid,gift["credits"]))
-                    c.execute("INSERT INTO claims(code,uid,token_id,credits,created_at) VALUES(?,?,?,?,?)",(code,uid,token_id,gift["credits"],now))
+                    c.execute("INSERT INTO claims(code,uid,receipt,token_id,credits,created_at) VALUES(?,?,?,?,?,?)",(code,uid,secrets.token_hex(4).upper(),token_id,gift["credits"],now))
                     balance=c.execute("SELECT balance FROM wallets WHERE uid=?",(uid,)).fetchone()[0]
                 return self.send_json(200,{"token_id":token_id,"credits":gift["credits"],"balance":balance})
             if not self.admin_ok(): return self.send_json(401,{"error":"مفتاح الإدارة غير صحيح."})
