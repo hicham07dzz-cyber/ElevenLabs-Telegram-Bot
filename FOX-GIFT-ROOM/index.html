@@ -4,7 +4,7 @@
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#101316">
 <title>FOX GIFT ROOM | مركز الهدايا</title>
 <style>
-:root{color-scheme:dark;--bg:#0b0e10;--panel:#151a1e;--line:#303a40;--orange:#ff8b32;--gold:#ffc16b;--muted:#9ca8ae;--white:#f5f7f8;--green:#64d6a0;--red:#ff7777}
+:root{color-scheme:dark;--line:#303a40;--orange:#ff8b32;--gold:#ffc16b;--muted:#9ca8ae;--white:#f5f7f8;--green:#64d6a0;--red:#ff7777}
 *{box-sizing:border-box}body{margin:0;min-height:100vh;background:radial-gradient(ellipse at 50% -15%,#553019 0,transparent 42%),linear-gradient(145deg,#0b0e10,#11171b 60%,#0b0e10);color:var(--white);font-family:system-ui,Arial,sans-serif;padding:20px}.shell{width:min(100%,760px);margin:auto}
 .top{display:flex;justify-content:space-between;align-items:center;margin:8px 0 25px;gap:12px}.brand{display:flex;align-items:center;gap:12px}.mark{width:46px;height:46px;display:grid;place-items:center;border-radius:14px;background:linear-gradient(145deg,#ffb45c,#d95b1d);color:#20140d;font-size:25px;font-weight:1000}.brand b{display:block;letter-spacing:2px;font-size:20px}.brand small{color:var(--muted);font-size:11px;letter-spacing:1.5px}a{color:var(--gold);text-decoration:none}.toplink{border:1px solid var(--line);padding:10px 13px;border-radius:11px;font-size:13px}
 .hero{text-align:center;padding:22px 12px 26px}.eyebrow{color:var(--gold);font-size:11px;letter-spacing:2px;font-weight:800}.hero h1{font-size:clamp(30px,7vw,48px);margin:15px 0 10px}.hero h1 span{color:var(--orange)}.hero p{color:var(--muted);max-width:500px;margin:auto;line-height:1.9;font-size:14px}
@@ -20,11 +20,11 @@ button{font:inherit;cursor:pointer}.primary{width:100%;height:56px;border:0;bord
 <div class="field"><label for="uid">معرّف اللاعب UID</label><input id="uid" inputmode="numeric" maxlength="24" placeholder="أدخل رقم اللاعب"></div>
 <div class="field"><label for="code">رمز الهدية GIFT CODE</label><input id="code" maxlength="32" placeholder="FOXWELCOME" dir="ltr"></div>
 <button class="primary" id="claim">تأكيد واستلام الهدية</button><div class="message" id="message" role="status" aria-live="polite"></div>
-<section class="result" id="result"><small>FOX GIFT RECEIPT</small><div class="token" id="receipt"></div><div class="reward" id="reward"></div></section>
-<div class="notice">الرصيد هنا خاص بنظام FOX GIFT ROOM المستقل. لا يمثل ألماساً أو أموالاً رسمية داخل Free Fire، ولا يتصل بخادم Garena أو Craftland تلقائياً.</div>
+<section class="result" id="result"><small>FOX GIFT TOKEN ID</small><div class="token" id="receipt"></div><div class="reward" id="reward"></div></section>
+<div class="notice">هذا نظام مستقل لرصيد FOX GIFT ROOM فقط، ولا يتصل بخوادم الألعاب أو يمنح عملات رسمية فيها.</div>
 </main><footer class="footer"><span>© FOX GIFT ROOM</span><span>PLAYER REWARD SYSTEM</span></footer></div>
 <script>
 const $=id=>document.getElementById(id);
-$("claim").onclick=async()=>{ $("result").classList.remove("show");$("message").textContent="";const uid=$("uid").value.trim(),code=$("code").value.trim().toUpperCase();if(!/^\d{5,24}$/.test(uid)){ $("message").textContent="تحقق من UID؛ يجب أن يكون من 5 إلى 24 رقماً.";return}if(!/^[A-Z0-9_-]{4,32}$/.test(code)){ $("message").textContent="تحقق من رمز الهدية.";return}
-try{const r=await fetch("/api/claim",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({uid,code})});const d=await r.json();if(!r.ok)throw Error(d.error||"تعذر إتمام الطلب");$("receipt").textContent=d.receipt;$("reward").textContent="تمت إضافة "+d.credits+" FOX Credits إلى محفظة UID "+uid;$("result").classList.add("show");$("message").style.color="var(--green)";$("message").textContent="تم قبول الرمز."; }catch(e){$("message").style.color="var(--red)";$("message").textContent=e.message==="Failed to fetch"?"الخادم غير مشغّل حالياً.":e.message}};
+$("claim").onclick=async()=>{$("result").classList.remove("show");$("message").style.color="var(--red)";$("message").textContent="";const uid=$("uid").value.trim(),code=$("code").value.trim().toUpperCase();if(!/^\\d{5,24}$/.test(uid)){$("message").textContent="تحقق من UID؛ يجب أن يكون من 5 إلى 24 رقماً.";return}if(!/^[A-Z0-9_-]{4,32}$/.test(code)){$("message").textContent="تحقق من رمز الهدية.";return}
+try{const r=await fetch("/api/claim",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({uid,code})});const d=await r.json();if(!r.ok)throw Error(d.error||"تعذر إتمام الطلب");$("receipt").textContent=d.token_id;$("reward").textContent="تمت إضافة "+d.credits+" FOX Credits إلى محفظة UID "+uid;$("result").classList.add("show");$("message").style.color="var(--green)";$("message").textContent="تم قبول الرمز."}catch(e){$("message").textContent=e.message==="Failed to fetch"?"الخادم غير مشغّل حالياً.":e.message}};
 </script></body></html>
