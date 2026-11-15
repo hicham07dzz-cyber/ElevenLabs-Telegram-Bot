@@ -74,7 +74,12 @@ object GroqAiService {
         return TranscriptionResult(json.optString("text", ""), segments)
     }
 
-    fun chat(apiKey: String, transcript: String, userRequest: String): String {
+    fun chat(
+        apiKey: String,
+        transcript: String,
+        userRequest: String,
+        history: List<Pair<String, String>> = emptyList()
+    ): String {
         require(apiKey.isNotBlank()) { "أدخل مفتاح API داخل التطبيق أولاً." }
         val connection = (URL("$BASE/chat/completions").openConnection() as HttpURLConnection).apply {
             requestMethod = "POST"
@@ -85,16 +90,19 @@ object GroqAiService {
             setRequestProperty("Content-Type", "application/json")
         }
         val messages = JSONArray()
-            .put(JSONObject().put("role", "system").put(
-                "content",
-                "أنت مساعد مونتاج فيديو. أجب بالعربية. افهم طلب المستخدم واقترح خطوات تحرير قابلة للتطبيق. " +
-                    "بعد إجابتك، أعط ثلاث نسخ تحرير مختلفة بعنوان: نسخة سريعة، نسخة متوازنة، نسخة سينمائية. " +
-                    "لا تدّع أنك نفذت التصدير. إذا لم تتوفر أوقات دقيقة فلا تخترعها."
-            ))
-            .put(JSONObject().put("role", "user").put(
-                "content",
-                "طلب التحرير: ${userRequest}\n\nتفريغ Whisper المتاح:\n${transcript.take(12000)}"
-            ))
+        messages.put(JSONObject().put("role", "system").put(
+            "content",
+            "أنت مساعد مونتاج فيديو. أجب بالعربية. افهم طلب المستخدم واقترح خطوات تحرير قابلة للتطبيق. " +
+                "في أول طلب، أعط ثلاث نسخ تحرير مختلفة بعنوان: نسخة سريعة، نسخة متوازنة، نسخة سينمائية. " +
+                "في الرسائل التالية تابع سياق المحادثة. لا تدّع أنك نفذت التصدير ولا تخترع أوقاتاً."
+        ))
+        history.takeLast(8).forEach { item ->
+            messages.put(JSONObject().put("role", item.first).put("content", item.second))
+        }
+        messages.put(JSONObject().put("role", "user").put(
+            "content",
+            "طلب التحرير: ${userRequest}\n\nتفريغ Whisper المتاح:\n${transcript.take(12000)}"
+        ))
         val payload = JSONObject()
             .put("model", "openai/gpt-oss-120b")
             .put("temperature", 0.4)
