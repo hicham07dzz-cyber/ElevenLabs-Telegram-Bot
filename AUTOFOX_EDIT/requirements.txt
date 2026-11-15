@@ -1,2 +1,2 @@
-scenedetect[opencv]>=0.6.4
-numpy>=1.26
+# No Python packages required. FFmpeg is provided by Termux:
+# pkg install python ffmpeg
