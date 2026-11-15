@@ -26,7 +26,7 @@ android {
 
 dependencies {
     implementation("androidx.activity:activity-ktx:1.10.0")
-    implementation("androidx.media3:media3-common:1.5.1")
-    implementation("androidx.media3:media3-transformer:1.5.1")
-    implementation("androidx.media3:media3-effect:1.5.1")
+    implementation("androidx.media3:media3-common:1.9.4")
+    implementation("androidx.media3:media3-transformer:1.9.4")
+    implementation("androidx.media3:media3-effect:1.9.4")
 }
