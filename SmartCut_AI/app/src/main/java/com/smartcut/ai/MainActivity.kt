@@ -118,6 +118,7 @@ class MainActivity : ComponentActivity() {
         apiKeyInput = EditText(this).apply {
             hint = "مفتاح Groq API — لا تضعه في GitHub أو ترسله لأحد"
             inputType = 129
+            isSaveEnabled = false
             setTextColor(-1)
         }
         root.addView(apiKeyInput)
@@ -208,6 +209,10 @@ class MainActivity : ComponentActivity() {
         try {
             val file = copyUriToCache(uri, "smartcut_source_video")
             source = file
+            transcriptSegments = emptyList()
+            smartCuts = null
+            transcriptInput.setText("")
+            uploadConsent.isChecked = false
             preview.setVideoURI(Uri.fromFile(file))
             preview.setOnPreparedListener { player ->
                 player.isLooping = true
@@ -432,7 +437,7 @@ class MainActivity : ComponentActivity() {
             contentResolver.openOutputStream(uri).use { output ->
                 requireNotNull(output).write(srt.toByteArray(Charsets.UTF_8))
             }
-            status.text = "تم حفظ ملف SRT بتوقيت تقريبي. راجع التوقيت قبل النشر."
+            status.text = if (transcriptSegments.isNotEmpty()) "تم حفظ SRT بتوقيت Whisper." else "تم حفظ SRT بتوقيت تقريبي."
         } catch (e: Exception) {
             status.text = "تعذر حفظ الترجمة: " + e.message
         }
