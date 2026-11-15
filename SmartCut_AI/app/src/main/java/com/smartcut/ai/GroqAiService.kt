@@ -74,6 +74,62 @@ object GroqAiService {
         return TranscriptionResult(json.optString("text", ""), segments)
     }
 
+
+    fun translateSegments(
+        apiKey: String,
+        segments: List<TranscriptSegment>,
+        targetLanguage: String
+    ): List<TranscriptSegment> {
+        require(apiKey.isNotBlank()) { "أدخل مفتاح API داخل التطبيق أولاً." }
+        if (segments.isEmpty()) return emptyList()
+        val translated = mutableMapOf<Int, String>()
+        for ((chunkIndex, chunk) in segments.chunked(35).withIndex()) {
+            val source = JSONArray()
+            chunk.forEachIndexed { index, segment ->
+                source.put(JSONObject().put("id", chunkIndex * 35 + index).put("text", segment.text))
+            }
+            val connection = (URL("$BASE/chat/completions").openConnection() as HttpURLConnection).apply {
+                requestMethod = "POST"
+                connectTimeout = 30000
+                readTimeout = 120000
+                doOutput = true
+                setRequestProperty("Authorization", "Bearer $apiKey")
+                setRequestProperty("Content-Type", "application/json")
+            }
+            val messages = JSONArray()
+                .put(JSONObject().put("role", "system").put(
+                    "content",
+                    "Translate every text item into $targetLanguage. Preserve IDs and order. " +
+                        "Return only valid JSON: {\"translations\":[{\"id\":0,\"text\":\"...\"}]}. " +
+                        "Do not add explanations or change IDs."
+                ))
+                .put(JSONObject().put("role", "user").put("content", source.toString()))
+            val payload = JSONObject()
+                .put("model", "openai/gpt-oss-120b")
+                .put("temperature", 0.1)
+                .put("messages", messages)
+            connection.outputStream.use { it.write(payload.toString().toByteArray(Charsets.UTF_8)) }
+            val code = connection.responseCode
+            val stream = if (code in 200..299) connection.inputStream else connection.errorStream
+            val body = BufferedReader(InputStreamReader(stream)).use { it.readText() }
+            connection.disconnect()
+            if (code !in 200..299) throw IllegalStateException("Translation API ($code): $body")
+            val content = JSONObject(body).getJSONArray("choices").getJSONObject(0)
+                .getJSONObject("message").optString("content")
+                .replace("^```(?:json)?\\s*".toRegex(), "")
+                .replace("\\s*```$".toRegex(), "")
+                .trim()
+            val items = JSONObject(content).getJSONArray("translations")
+            for (i in 0 until items.length()) {
+                val item = items.getJSONObject(i)
+                translated[item.getInt("id")] = item.optString("text")
+            }
+        }
+        return segments.mapIndexed { index, segment ->
+            segment.copy(text = translated[index]?.takeIf { it.isNotBlank() } ?: segment.text)
+        }
+    }
+
     fun chat(
         apiKey: String,
         transcript: String,
