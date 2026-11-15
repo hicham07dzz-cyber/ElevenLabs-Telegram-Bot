@@ -41,6 +41,7 @@ class MainActivity : ComponentActivity() {
     private lateinit var chatOutput: TextView
     private lateinit var uploadConsent: CheckBox
     private var transcriptSegments: List<TranscriptSegment> = emptyList()
+    private val chatHistory = mutableListOf<Pair<String, String>>()
     private var smartCuts: List<ClipRange>? = null
     private var source: File? = null
     private var music: File? = null
@@ -354,10 +355,14 @@ class MainActivity : ComponentActivity() {
         chatOutput.text = "محرر AI يفكر..."
         thread {
             try {
-                val response = GroqAiService.chat(key, transcriptInput.text.toString(), request)
+                val response = GroqAiService.chat(
+                    key, transcriptInput.text.toString(), request, chatHistory.toList()
+                )
+                chatHistory.add("user" to request)
+                chatHistory.add("assistant" to response)
                 runOnUiThread {
                     chatOutput.text = response
-                    status.text = "وصل رد محرر AI. راجع النسخ الثلاث."
+                    status.text = "وصل رد محرر AI. راجع النسخ الثلاث ويمكنك متابعة الحوار."
                 }
             } catch (e: Exception) {
                 runOnUiThread { chatOutput.text = "تعذر الاتصال بمحرر AI: ${e.message}" }
