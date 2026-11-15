@@ -1,6 +1,8 @@
 package com.smartcut.ai
 
 import android.content.ContentValues
+import android.graphics.Bitmap
+import android.media.MediaMetadataRetriever
 import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
@@ -8,14 +10,22 @@ import android.widget.*
 import androidx.activity.ComponentActivity
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.media3.common.MediaItem
+import androidx.media3.common.util.UnstableApi
+import androidx.media3.effect.Presentation
+import androidx.media3.transformer.Composition
 import androidx.media3.transformer.EditedMediaItem
+import androidx.media3.transformer.EditedMediaItemSequence
+import androidx.media3.transformer.Effects
 import androidx.media3.transformer.ExportException
 import androidx.media3.transformer.ExportResult
 import androidx.media3.transformer.Transformer
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
+import java.util.Locale
+import kotlin.concurrent.thread
 
+@OptIn(UnstableApi::class)
 class MainActivity : ComponentActivity() {
     private lateinit var preview: VideoView
     private lateinit var status: TextView
@@ -23,90 +33,320 @@ class MainActivity : ComponentActivity() {
     private lateinit var exportButton: Button
     private lateinit var startInput: EditText
     private lateinit var endInput: EditText
+    private lateinit var ratioSpinner: Spinner
+    private lateinit var commandInput: EditText
+    private lateinit var transcriptInput: EditText
+    private lateinit var analysisView: TextView
     private var source: File? = null
+    private var music: File? = null
+    private var durationMs: Long = 0L
 
-    private val picker = registerForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
+    private val videoPicker = registerForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
         if (uri != null) loadVideo(uri)
+    }
+    private val musicPicker = registerForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
+        if (uri != null) loadMusic(uri)
+    }
+    private val subtitleSaver = registerForActivityResult(ActivityResultContracts.CreateDocument("application/x-subrip")) { uri ->
+        if (uri != null) saveSubtitles(uri)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val root = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
-            setPadding(24, 30, 24, 24)
+            setPadding(22, 28, 22, 26)
             setBackgroundColor(0xFF10131A.toInt())
         }
         fun label(value: String, size: Float, color: Int = -1) = TextView(this).apply {
-            text = value; textSize = size; setTextColor(color)
+            text = value
+            textSize = size
+            setTextColor(color)
+        }
+        fun section(value: String) {
+            root.addView(label(value, 18f, 0xFFFF9A45.toInt()).apply { setPadding(0, 20, 0, 8) })
         }
         root.addView(label("SMARTCUT AI", 28f, 0xFFFF8A32.toInt()))
-        root.addView(label("مونتاج الفيديو على هاتفك", 17f).apply { setPadding(0, 8, 0, 20) })
+        root.addView(label("استوديو مونتاج الفيديو — Android", 15f, 0xFFB7C0CC.toInt()).apply {
+            setPadding(0, 6, 0, 18)
+        })
         preview = VideoView(this)
-        root.addView(preview, LinearLayout.LayoutParams(-1, 220).apply { bottomMargin = 16 })
+        root.addView(preview, LinearLayout.LayoutParams(-1, 210).apply { bottomMargin = 12 })
         pickButton = Button(this).apply {
-            text = "اختيار فيديو"
-            setOnClickListener { picker.launch(arrayOf("video/*")) }
+            text = "＋ اختيار فيديو"
+            setOnClickListener { videoPicker.launch(arrayOf("video/*")) }
         }
         root.addView(pickButton)
-        root.addView(label("قص الفيديو — الوقت بالثواني", 17f).apply { setPadding(0, 20, 0, 8) })
-        val fields = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL }
-        startInput = EditText(this).apply { hint = "من 0"; setText("0"); inputType = 8194; setTextColor(-1) }
-        endInput = EditText(this).apply { hint = "إلى"; inputType = 8194; setTextColor(-1) }
-        fields.addView(startInput, LinearLayout.LayoutParams(0, -2, 1f))
-        fields.addView(endInput, LinearLayout.LayoutParams(0, -2, 1f))
-        root.addView(fields)
+
+        section("1. القص والمقاس")
+        root.addView(label("بداية ونهاية المقطع بالثواني", 14f, 0xFFCBD2DC.toInt()))
+        val times = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL }
+        startInput = EditText(this).apply {
+            hint = "من 0"
+            setText("0")
+            inputType = 8194
+            setTextColor(-1)
+        }
+        endInput = EditText(this).apply {
+            hint = "إلى"
+            inputType = 8194
+            setTextColor(-1)
+        }
+        times.addView(startInput, LinearLayout.LayoutParams(0, -2, 1f))
+        times.addView(endInput, LinearLayout.LayoutParams(0, -2, 1f))
+        root.addView(times)
+        ratioSpinner = Spinner(this)
+        ratioSpinner.adapter = ArrayAdapter(this, android.R.layout.simple_spinner_dropdown_item,
+            listOf("عمودي 9:16 — Reels / TikTok", "أفقي 16:9 — YouTube", "مربع 1:1"))
+        root.addView(ratioSpinner)
+
+        section("2. تحليل الفيديو")
+        root.addView(Button(this).apply {
+            text = "تحليل الصورة والمدة"
+            setOnClickListener { analyzeVideo() }
+        })
+        analysisView = label("اختر فيديو لعرض معلوماته وتحليل عينات من الإطارات.", 13f, 0xFFB7C0CC.toInt())
+        root.addView(analysisView)
+
+        section("3. الموسيقى")
+        root.addView(Button(this).apply {
+            text = "اختيار ملف موسيقى"
+            setOnClickListener { musicPicker.launch(arrayOf("audio/*")) }
+        })
+        root.addView(label("يمكن دمج مسار موسيقى خلفية مع صوت الفيديو أثناء التصدير.", 12f, 0xFF8993A2.toInt()))
+
+        section("4. مساعد أوامر التحرير")
+        commandInput = EditText(this).apply {
+            hint = "مثال: جهّز الفيديو لتيك توك أو اجعله مربعاً"
+            setTextColor(-1)
+        }
+        root.addView(commandInput)
+        root.addView(Button(this).apply {
+            text = "فهم الأمر وتطبيق الإعدادات"
+            setOnClickListener { applyLocalCommand() }
+        })
+
+        section("5. النص والترجمة")
+        root.addView(label("ألصق النص المنطوق هنا ثم أنشئ ملف SRT بتوقيت تقريبي.", 12f, 0xFFB7C0CC.toInt()))
+        transcriptInput = EditText(this).apply {
+            hint = "النص المنطوق..."
+            minLines = 3
+            gravity = android.view.Gravity.TOP
+            setTextColor(-1)
+        }
+        root.addView(transcriptInput)
+        root.addView(Button(this).apply {
+            text = "تصدير النص كملف ترجمة SRT"
+            setOnClickListener {
+                if (transcriptInput.text.toString().isBlank()) {
+                    status.text = "أدخل النص أولاً لإنشاء ملف الترجمة."
+                } else subtitleSaver.launch("SmartCut_Captions.srt")
+            }
+        })
+
+        section("6. التصدير")
         exportButton = Button(this).apply {
-            text = "قص وتصدير MP4"
+            text = "تصدير الفيديو MP4"
             isEnabled = false
             setOnClickListener { exportVideo() }
         }
-        root.addView(exportButton, LinearLayout.LayoutParams(-1, -2).apply { topMargin = 14 })
-        status = label("الإصدار الأول: اختيار الفيديو ومعاينته وقصه.", 14f, 0xFFB7C0CC.toInt())
+        root.addView(exportButton)
+        status = label("بانتظار اختيار فيديو.", 14f, 0xFFB7C0CC.toInt())
         status.setPadding(0, 18, 0, 0)
         root.addView(status)
-        root.addView(label("ميزات الذكاء الاصطناعي قيد التطوير ولم تُدمج بعد.", 12f, 0xFF8993A2.toInt()).apply { setPadding(0, 14, 0, 0) })
+        root.addView(label("ملاحظة: تحليل الإطارات والمقاسات ودمج الموسيقى متاح في هذه المرحلة. تفريغ Whisper والقص الذكي الدلالي والترجمة المتزامنة تلقائياً ما زالت قيد الدمج.", 12f, 0xFF8993A2.toInt()).apply {
+            setPadding(0, 16, 0, 0)
+        })
         setContentView(ScrollView(this).apply { addView(root) })
+    }
+
+    private fun copyUriToCache(uri: Uri, name: String): File {
+        val file = File(cacheDir, name)
+        contentResolver.openInputStream(uri).use { input ->
+            requireNotNull(input) { "تعذر فتح الملف المختار" }.use { stream ->
+                FileOutputStream(file).use { output -> stream.copyTo(output) }
+            }
+        }
+        return file
     }
 
     private fun loadVideo(uri: Uri) {
         try {
-            val file = File(cacheDir, "smartcut_source_video")
-            contentResolver.openInputStream(uri).use { input ->
-                requireNotNull(input).copyTo(FileOutputStream(file))
-            }
+            val file = copyUriToCache(uri, "smartcut_source_video")
             source = file
             preview.setVideoURI(Uri.fromFile(file))
             preview.setOnPreparedListener { player ->
                 player.isLooping = true
                 preview.start()
-                endInput.setText((player.duration / 1000).toString())
-                status.text = "تم تحميل الفيديو — " + (player.duration / 1000) + " ثانية"
+                durationMs = player.duration.toLong()
+                endInput.setText(String.format(Locale.US, "%.1f", durationMs / 1000.0))
+                status.text = "تم تحميل الفيديو — " + (durationMs / 1000) + " ثانية"
                 exportButton.isEnabled = true
             }
         } catch (e: Exception) {
-            status.text = "تعذر تحميل الفيديو: " + e.message
+            status.text = "تعذر تحميل الفيديو: " + (e.message ?: "خطأ غير معروف")
         }
+    }
+
+    private fun loadMusic(uri: Uri) {
+        try {
+            music = copyUriToCache(uri, "smartcut_background_music")
+            status.text = "تم اختيار الموسيقى. ستتكرر لتغطية مدة الفيديو."
+        } catch (e: Exception) {
+            status.text = "تعذر تحميل الموسيقى: " + (e.message ?: "خطأ غير معروف")
+        }
+    }
+
+    private fun analyzeVideo() {
+        val file = source
+        if (file == null) {
+            status.text = "اختر فيديو أولاً."
+            return
+        }
+        analysisView.text = "جارٍ تحليل عينات من الإطارات..."
+        thread {
+            val retriever = MediaMetadataRetriever()
+            try {
+                retriever.setDataSource(file.absolutePath)
+                val width = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_WIDTH)?.toIntOrNull() ?: 0
+                val height = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_HEIGHT)?.toIntOrNull() ?: 0
+                val duration = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION)?.toLongOrNull() ?: durationMs
+                val samples = mutableListOf<Double>()
+                for (i in 0 until 8) {
+                    val timeUs = (duration * 1000L * i / 8).coerceAtLeast(0L)
+                    val bitmap: Bitmap? = retriever.getFrameAtTime(timeUs, MediaMetadataRetriever.OPTION_CLOSEST_SYNC)
+                    if (bitmap != null) {
+                        val stepX = (bitmap.width / 32).coerceAtLeast(1)
+                        val stepY = (bitmap.height / 32).coerceAtLeast(1)
+                        var total = 0L
+                        var n = 0
+                        var y = 0
+                        while (y < bitmap.height) {
+                            var x = 0
+                            while (x < bitmap.width) {
+                                val pixel = bitmap.getPixel(x, y)
+                                val luma = (0.2126 * ((pixel shr 16) and 0xFF) +
+                                    0.7152 * ((pixel shr 8) and 0xFF) +
+                                    0.0722 * (pixel and 0xFF)).toInt()
+                                total += luma
+                                n++
+                                x += stepX
+                            }
+                            y += stepY
+                        }
+                        if (n > 0) samples.add(total.toDouble() / n)
+                        bitmap.recycle()
+                    }
+                }
+                val average = if (samples.isNotEmpty()) samples.average() else 0.0
+                val variation = if (samples.size > 1) samples.maxOrNull()!! - samples.minOrNull()!! else 0.0
+                val note = when {
+                    samples.isEmpty() -> "لم أتمكن من قراءة الإطارات."
+                    average < 65 -> "العينة العامة داكنة؛ راجع الإضاءة."
+                    average > 205 -> "العينة شديدة السطوع؛ راجع التعريض."
+                    else -> "متوسط الإضاءة ضمن نطاق متوازن تقريبياً."
+                }
+                val result = "الدقة: " + width + "×" + height + "\nالمدة: " + (duration / 1000) +
+                    " ثانية\nمتوسط سطوع العينات: " + average.toInt() + "/255\n" +
+                    "تغيّر السطوع بين العينات: " + variation.toInt() + "\n" + note +
+                    "\nهذا فحص إطارات أولي، وليس فهماً دلالياً للمشاهد."
+                runOnUiThread {
+                    analysisView.text = result
+                    if (durationMs == 0L) {
+                        durationMs = duration
+                        endInput.setText(String.format(Locale.US, "%.1f", duration / 1000.0))
+                    }
+                }
+            } catch (e: Exception) {
+                runOnUiThread { analysisView.text = "تعذر التحليل: " + e.message }
+            } finally {
+                retriever.release()
+            }
+        }
+    }
+
+    private fun applyLocalCommand() {
+        val command = commandInput.text.toString().lowercase(Locale.ROOT)
+        when {
+            command.contains("تيك توك") || command.contains("ريلز") || command.contains("reels") ->
+                ratioSpinner.setSelection(0)
+            command.contains("يوتيوب") || command.contains("youtube") ->
+                ratioSpinner.setSelection(1)
+            command.contains("مربع") || command.contains("square") ->
+                ratioSpinner.setSelection(2)
+        }
+        val match = Regex("(?:من\\s*)?(\\d+(?:\\.\\d+)?)\\s*(?:إلى|الى|حتى|to)\\s*(\\d+(?:\\.\\d+)?)").find(command)
+        if (match != null) {
+            startInput.setText(match.groupValues[1])
+            endInput.setText(match.groupValues[2])
+        } else if (command.contains("أول 30") || command.contains("اول 30")) {
+            startInput.setText("0")
+            endInput.setText("30")
+        }
+        status.text = "طبّقت الإعدادات التي فهمها مساعد الأوامر المحلي. راجع المقاس والأوقات قبل التصدير."
+    }
+
+    private fun saveSubtitles(uri: Uri) {
+        try {
+            val fullText = transcriptInput.text.toString().trim()
+            val lines = fullText.split(Regex("(?<=[.!؟?])\\s+|\\n+")).filter { it.isNotBlank() }
+            val totalMs = (endInput.text.toString().toDoubleOrNull()?.times(1000)?.toLong()
+                ?: durationMs).coerceAtLeast(1000L)
+            val startMs = (startInput.text.toString().toDoubleOrNull()?.times(1000)?.toLong() ?: 0L).coerceAtLeast(0L)
+            val span = (totalMs - startMs).coerceAtLeast(1000L)
+            val chunk = (span / lines.size.coerceAtLeast(1)).coerceAtLeast(1000L)
+            val srt = lines.mapIndexed { index, line ->
+                val start = startMs + index * chunk
+                val end = if (index == lines.lastIndex) totalMs else (start + chunk).coerceAtMost(totalMs)
+                (index + 1).toString() + "\n" + srtTime(start) + " --> " + srtTime(end) + "\n" + line
+            }.joinToString("\n\n")
+            contentResolver.openOutputStream(uri).use { output ->
+                requireNotNull(output).write(srt.toByteArray(Charsets.UTF_8))
+            }
+            status.text = "تم حفظ ملف SRT بتوقيت تقريبي. راجع التوقيت قبل النشر."
+        } catch (e: Exception) {
+            status.text = "تعذر حفظ الترجمة: " + e.message
+        }
+    }
+
+    private fun srtTime(ms: Long): String {
+        val safe = ms.coerceAtLeast(0L)
+        val hours = safe / 3_600_000
+        val minutes = (safe % 3_600_000) / 60_000
+        val seconds = (safe % 60_000) / 1000
+        val millis = safe % 1000
+        return String.format(Locale.US, "%02d:%02d:%02d,%03d", hours, minutes, seconds, millis)
     }
 
     private fun exportVideo() {
         val input = source ?: return
         val from = ((startInput.text.toString().toDoubleOrNull() ?: 0.0) * 1000).toLong()
         val to = ((endInput.text.toString().toDoubleOrNull() ?: 0.0) * 1000).toLong()
-        if (from < 0 || to <= from) {
-            status.text = "أدخل وقت بداية ونهاية صحيحين."
+        if (from < 0 || to <= from || (durationMs > 0 && to > durationMs + 500)) {
+            status.text = "أدخل وقت بداية ونهاية صحيحين ضمن مدة الفيديو."
             return
+        }
+        val ratio = when (ratioSpinner.selectedItemPosition) {
+            0 -> 9f / 16f
+            1 -> 16f / 9f
+            else -> 1f
         }
         val output = File(cacheDir, "smartcut_output.mp4")
         output.delete()
         exportButton.isEnabled = false
         pickButton.isEnabled = false
-        status.text = "جارٍ تنفيذ القص..."
-        val mediaItem = MediaItem.Builder().setUri(Uri.fromFile(input))
+        status.text = if (music == null) "جارٍ القص وتطبيق المقاس..." else "جارٍ القص ودمج الموسيقى..."
+        val clip = MediaItem.Builder().setUri(Uri.fromFile(input))
             .setClippingConfiguration(MediaItem.ClippingConfiguration.Builder()
                 .setStartPositionMs(from).setEndPositionMs(to).build()).build()
-        val edited = EditedMediaItem.Builder(mediaItem).build()
-        val listener = object : Transformer.Listener {
-            override fun onCompleted(composition: androidx.media3.transformer.Composition, exportResult: ExportResult) {
+        val presentation = Presentation.createForAspectRatio(
+            ratio, Presentation.LAYOUT_SCALE_TO_FIT_WITH_CROP
+        )
+        val editedVideo = EditedMediaItem.Builder(clip)
+            .setEffects(Effects(emptyList(), listOf(presentation)))
+            .build()
+        val transformer = Transformer.Builder(this).addListener(object : Transformer.Listener {
+            override fun onCompleted(composition: Composition, exportResult: ExportResult) {
                 try {
                     val values = ContentValues().apply {
                         put(MediaStore.Video.Media.DISPLAY_NAME, "SmartCut_" + System.currentTimeMillis() + ".mp4")
@@ -114,24 +354,39 @@ class MainActivity : ComponentActivity() {
                         put(MediaStore.Video.Media.RELATIVE_PATH, "Movies/SmartCutAI")
                     }
                     val saved = contentResolver.insert(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, values)
-                        ?: error("تعذر إنشاء الملف")
+                        ?: error("تعذر إنشاء ملف الحفظ")
                     contentResolver.openOutputStream(saved).use { out ->
                         requireNotNull(out)
                         FileInputStream(output).use { it.copyTo(out) }
                     }
-                    status.text = "نجح التصدير! تحقق من Movies/SmartCutAI."
+                    status.text = "اكتمل التصدير. تحقق من مجلد Movies/SmartCutAI."
                 } catch (e: Exception) {
-                    status.text = "اكتمل القص وتعذر الحفظ: " + e.message
+                    status.text = "اكتمل التحويل لكن تعذر الحفظ: " + e.message
                 }
                 exportButton.isEnabled = true
                 pickButton.isEnabled = true
             }
-            override fun onError(composition: androidx.media3.transformer.Composition, exportResult: ExportResult, exportException: ExportException) {
-                status.text = "فشل القص: " + exportException.message
+            override fun onError(composition: Composition, exportResult: ExportResult, exportException: ExportException) {
+                status.text = "فشل التصدير: " + exportException.message
                 exportButton.isEnabled = true
                 pickButton.isEnabled = true
             }
+        }).build()
+        try {
+            val selectedMusic = music
+            if (selectedMusic == null) {
+                transformer.start(editedVideo, output.absolutePath)
+            } else {
+                val videoSequence = EditedMediaItemSequence.withAudioAndVideoFrom(listOf(editedVideo))
+                val musicItem = EditedMediaItem.Builder(MediaItem.fromUri(Uri.fromFile(selectedMusic))).build()
+                val musicSequence = EditedMediaItemSequence.withAudioFrom(listOf(musicItem))
+                    .buildUpon().setIsLooping(true).build()
+                transformer.start(Composition.Builder(videoSequence, musicSequence).build(), output.absolutePath)
+            }
+        } catch (e: Exception) {
+            status.text = "تعذر بدء التصدير: " + e.message
+            exportButton.isEnabled = true
+            pickButton.isEnabled = true
         }
-        Transformer.Builder(this).addListener(listener).build().start(edited, output.absolutePath)
     }
 }
