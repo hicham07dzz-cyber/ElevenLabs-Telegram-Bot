@@ -1,23 +1,10 @@
 <!doctype html>
-<html lang="ar" dir="rtl">
-<head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#10151d"><link rel="manifest" href="manifest.json">
-<link rel="stylesheet" href="style.css"><title>AUTOFOX EDIT</title>
-</head>
-<body>
-<header><div class="brand"><span class="mark">AF</span><div><h1>AUTOFOX EDIT</h1><p>مونتاجك يبدأ من هنا</p></div></div><span class="tag">BETA</span></header>
-<main>
-<section class="hero"><p class="eyebrow">SMART VIDEO EDITOR</p><h2>حوّل فيديوهاتك إلى<br><em>مونتاج تلقائي</em></h2><p class="sub">يحلّل المشاهد، يختار اللقطات ذات الحركة، ويركّبها في فيديو واحد.</p></section>
-<section class="panel">
-<label class="drop" for="video"><span class="upload">＋</span><strong>اختر فيديو من هاتفك</strong><small>MP4 · MOV · MKV · WEBM — حتى 800MB</small><span id="filename">لم يتم اختيار فيديو بعد</span></label>
-<input id="video" type="file" accept="video/*" hidden>
-<button id="start" disabled>ابدأ المونتاج التلقائي <span>↗</span></button>
-<div class="progress" id="progress" hidden><div class="bar"></div><p id="status">جارٍ تحليل الفيديو...</p></div>
-<div id="result" class="result" hidden></div>
-</section>
-<section class="features"><article><b>01</b><strong>تحليل المشاهد</strong><p>اكتشاف تغيّر اللقطات.</p></article><article><b>02</b><strong>اختيار ذكي أولي</strong><p>تقييم الحركة وترتيب المقاطع.</p></article><article><b>03</b><strong>تصدير MP4</strong><p>حفظ نسخة جديدة دون المساس بالأصل.</p></article></section>
-<p class="note">النسخة التجريبية تستخدم تحليل الحركة وتغيّر المشاهد، ولا تتعرّف بعد على Headshot أو محتوى الكلام ولا تضيف موسيقى ومؤثرات متقدمة.</p>
-</main><footer>AUTOFOX EDIT · نسخة تجريبية محلية</footer>
-<script src="app.js"></script>
-</body></html>
+<html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#10151d"><link rel="manifest" href="manifest.json"><link rel="stylesheet" href="style.css"><title>AUTOFOX EDIT</title></head>
+<body><header><div class="brand"><span class="mark">AF</span><div><h1>AUTOFOX EDIT</h1><p>مونتاج تلقائي على هاتفك</p></div></div><span class="tag">BETA</span></header>
+<main><section class="hero"><p class="eyebrow">SMART VIDEO EDITOR</p><h2>حوّل فيديوهاتك إلى<br><em>مونتاج تلقائي</em></h2><p class="sub">يحلّل تغيّر المشاهد والحركة ومستوى الصوت، ثم يختار اللقطات ويركبها تلقائياً.</p></section>
+<section class="panel"><label class="drop" for="video"><span class="upload">＋</span><strong>اختر فيديو من هاتفك</strong><small>MP4 · MOV · MKV · WEBM — حتى 800MB</small><span id="filename">لم يتم اختيار فيديو بعد</span></label><input id="video" type="file" accept="video/*" hidden>
+<div class="settings"><label>شكل الفيديو<select id="aspect"><option value="original">أفقي 16:9</option><option value="vertical">عمودي 9:16 (ريلز/شورتس)</option><option value="square">مربع 1:1</option></select></label><label>مدة المونتاج<select id="seconds"><option value="15">15 ثانية</option><option value="30" selected>30 ثانية</option><option value="45">45 ثانية</option><option value="60">60 ثانية</option></select></label></div>
+<label class="music" for="music"><strong>＋ إضافة موسيقى اختيارية</strong><small id="musicname">بدون موسيقى إضافية</small></label><input id="music" type="file" accept="audio/*" hidden>
+<button id="start" disabled>ابدأ المونتاج التلقائي <span>↗</span></button><div class="progress" id="progress" hidden><div class="bar"></div><p id="status">جارٍ تحليل الفيديو...</p></div><div id="result" class="result" hidden></div></section>
+<section class="features"><article><b>01</b><strong>تحليل المشاهد</strong><p>اكتشاف تغيّر اللقطات.</p></article><article><b>02</b><strong>تقييم الحركة والصوت</strong><p>ترتيب المقاطع حسب النشاط.</p></article><article><b>03</b><strong>إخراج تلقائي</strong><p>أفقي أو عمودي أو مربع مع موسيقى اختيارية.</p></article></section>
+<p class="note">تنبيه: هذا إصدار تجريبي يعتمد مؤشرات الحركة والصوت، ولا يكتشف دلالياً Headshot أو Kill أو الكلام. الموسيقى المختارة تستبدل صوت الفيديو الأصلي.</p></main><footer>AUTOFOX EDIT · معالجة محلية</footer><script src="app.js"></script></body></html>
