@@ -471,10 +471,11 @@ class MainActivity : ComponentActivity() {
             val presentation = Presentation.createForAspectRatio(
                 ratio, Presentation.LAYOUT_SCALE_TO_FIT_WITH_CROP
             )
+            val itemCues = captionCuesFor(listOf(range))
             val videoEffects = mutableListOf<androidx.media3.common.Effect>(presentation)
-            if (captionCues.isNotEmpty()) {
+            if (itemCues.isNotEmpty()) {
                 videoEffects.add(androidx.media3.effect.OverlayEffect(
-                    listOf(SmartCutCaptionOverlay(captionCues))
+                    listOf(SmartCutCaptionOverlay(itemCues))
                 ))
             }
             EditedMediaItem.Builder(clip)
@@ -513,7 +514,15 @@ class MainActivity : ComponentActivity() {
             val selectedMusic = music
             val sequences = mutableListOf(videoSequence)
             if (selectedMusic != null) {
-                val musicItem = EditedMediaItem.Builder(MediaItem.fromUri(Uri.fromFile(selectedMusic))).build()
+                val speechRanges = captionCues.map {
+                    ClipRange(it.startMs / 1000.0, it.endMs / 1000.0)
+                }
+                val duckingProcessor = androidx.media3.common.audio.GainProcessor(
+                    SpeechDuckingGainProvider(speechRanges)
+                )
+                val musicItem = EditedMediaItem.Builder(MediaItem.fromUri(Uri.fromFile(selectedMusic)))
+                    .setEffects(Effects(listOf(duckingProcessor), emptyList()))
+                    .build()
                 val musicSequence = EditedMediaItemSequence.withAudioFrom(listOf(musicItem))
                     .buildUpon().setIsLooping(true).build()
                 sequences.add(musicSequence)
