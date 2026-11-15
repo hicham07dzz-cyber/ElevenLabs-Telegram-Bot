@@ -407,17 +407,23 @@ class MainActivity : ComponentActivity() {
     private fun saveSubtitles(uri: Uri) {
         try {
             val fullText = transcriptInput.text.toString().trim()
-            val lines = fullText.split(Regex("(?<=[.!؟?])\\s+|\\n+")).filter { it.isNotBlank() }
-            val totalMs = (endInput.text.toString().toDoubleOrNull()?.times(1000)?.toLong()
-                ?: durationMs).coerceAtLeast(1000L)
-            val startMs = (startInput.text.toString().toDoubleOrNull()?.times(1000)?.toLong() ?: 0L).coerceAtLeast(0L)
-            val span = (totalMs - startMs).coerceAtLeast(1000L)
-            val chunk = (span / lines.size.coerceAtLeast(1)).coerceAtLeast(1000L)
-            val srt = lines.mapIndexed { index, line ->
-                val start = startMs + index * chunk
-                val end = if (index == lines.lastIndex) totalMs else (start + chunk).coerceAtMost(totalMs)
-                (index + 1).toString() + "\n" + srtTime(start) + " --> " + srtTime(end) + "\n" + line
-            }.joinToString("\n\n")
+            val ranges = smartCuts ?: listOf(ClipRange(0.0, durationMs.coerceAtLeast(1000L) / 1000.0))
+            val cues = captionCuesFor(ranges)
+            val srt = if (cues.isNotEmpty()) {
+                cues.mapIndexed { index, cue ->
+                    (index + 1).toString() + "\n" + srtTime(cue.startMs) + " --> " +
+                        srtTime(cue.endMs) + "\n" + cue.text
+                }.joinToString("\n\n")
+            } else {
+                val lines = fullText.split(Regex("(?<=[.!؟?])\\s+|\\n+")).filter { it.isNotBlank() }
+                val totalMs = durationMs.coerceAtLeast(1000L)
+                val chunk = (totalMs / lines.size.coerceAtLeast(1)).coerceAtLeast(1000L)
+                lines.mapIndexed { index, line ->
+                    val startMs = index * chunk
+                    val endMs = if (index == lines.lastIndex) totalMs else (startMs + chunk).coerceAtMost(totalMs)
+                    (index + 1).toString() + "\n" + srtTime(startMs) + " --> " + srtTime(endMs) + "\n" + line
+                }.joinToString("\n\n")
+            }
             contentResolver.openOutputStream(uri).use { output ->
                 requireNotNull(output).write(srt.toByteArray(Charsets.UTF_8))
             }
@@ -472,7 +478,11 @@ class MainActivity : ComponentActivity() {
                 ratio, Presentation.LAYOUT_SCALE_TO_FIT_WITH_CROP
             )
             val itemCues = captionCuesFor(listOf(range))
-            val videoEffects = mutableListOf<androidx.media3.common.Effect>(presentation)
+            val videoEffects = mutableListOf<androidx.media3.common.Effect>(
+                presentation,
+                androidx.media3.effect.Brightness(0.015f),
+                androidx.media3.effect.Contrast(0.035f)
+            )
             if (itemCues.isNotEmpty()) {
                 videoEffects.add(androidx.media3.effect.OverlayEffect(
                     listOf(SmartCutCaptionOverlay(itemCues))
