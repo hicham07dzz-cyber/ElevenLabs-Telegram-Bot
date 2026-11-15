@@ -135,3 +135,21 @@ object SmartCutPlanner {
         return merged.filter { it.endSeconds - it.startSeconds >= 0.45 }
     }
 }
+
+
+data class CaptionCue(val startMs: Long, val endMs: Long, val text: String)
+
+@androidx.media3.common.util.UnstableApi
+class SmartCutCaptionOverlay(private val cues: List<CaptionCue>) : androidx.media3.effect.TextOverlay() {
+    override fun getText(presentationTimeUs: Long): android.text.SpannableString {
+        val timeMs = presentationTimeUs / 1000L
+        val caption = cues.firstOrNull { timeMs >= it.startMs && timeMs <= it.endMs }?.text.orEmpty()
+        val styled = android.text.SpannableString(caption)
+        if (caption.isNotEmpty()) {
+            styled.setSpan(android.text.style.ForegroundColorSpan(android.graphics.Color.WHITE), 0, caption.length, android.text.Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
+            styled.setSpan(android.text.style.BackgroundColorSpan(0x99000000.toInt()), 0, caption.length, android.text.Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
+            styled.setSpan(android.text.style.StyleSpan(android.graphics.Typeface.BOLD), 0, caption.length, android.text.Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
+        }
+        return styled
+    }
+}
