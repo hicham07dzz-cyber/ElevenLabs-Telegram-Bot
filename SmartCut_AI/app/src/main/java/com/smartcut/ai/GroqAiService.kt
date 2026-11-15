@@ -153,3 +153,17 @@ class SmartCutCaptionOverlay(private val cues: List<CaptionCue>) : androidx.medi
         return styled
     }
 }
+
+
+@androidx.media3.common.util.UnstableApi
+class SpeechDuckingGainProvider(private val speechRanges: List<ClipRange>) :
+    androidx.media3.common.audio.GainProcessor.GainProvider {
+    override fun getGainFactorAtSamplePosition(samplePosition: Long, sampleRate: Int): Float {
+        if (sampleRate <= 0) return 0.35f
+        val seconds = samplePosition.toDouble() / sampleRate.toDouble()
+        return if (speechRanges.any { seconds >= it.startSeconds && seconds <= it.endSeconds }) 0.16f else 0.42f
+    }
+
+    override fun isUnityUntil(samplePosition: Long, sampleRate: Int): Long =
+        androidx.media3.common.C.TIME_UNSET
+}
