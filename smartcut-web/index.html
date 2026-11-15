@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0b0d12"><meta name="description" content="SmartCut AI — استوديو يفهم أسلوب المونتاج ويخطط لإعادة تنفيذه على لقطاتك.">
+<title>SmartCut AI — Studio</title><link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+<div class="app-shell">
+<header class="topbar">
+ <a class="brand" href="#"><span class="brand-mark">S</span><span>SMARTCUT <b>AI</b><small>CREATIVE VIDEO STUDIO</small></span></a>
+ <div class="top-actions"><span class="local-pill"><i></i> معالجة محلية للملفات</span><button class="icon-btn" id="helpBtn" aria-label="مساعدة">؟</button></div>
+</header>
+<main>
+<section class="hero">
+ <div class="hero-copy"><div class="eyebrow"><span></span> اصنع المونتاج، لا تتعب في تفاصيله</div>
+ <h1>فيديو مرجعي واحد.<br><em>مونتاج جديد بالكامل.</em></h1>
+ <p>ارفع الفيديو الذي أعجبك، أضف لقطاتك، وحدد المدة. SmartCut يحلل الإيقاع واللقطات ويجهز لك خطة مونتاج قابلة للمراجعة.</p>
+ <div class="hero-note"><span>✦</span> ملفاتك تبقى على جهازك في هذه النسخة التجريبية.</div></div>
+ <div class="hero-art" aria-hidden="true"><div class="orbit orbit-a"></div><div class="orbit orbit-b"></div><div class="play-core">▶</div><div class="float-tag tag-one">CUT · 00:04</div><div class="float-tag tag-two">COLOR · CINEMA</div><div class="wave"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div></div>
+</section>
+<section class="workspace">
+ <div class="section-heading"><div><span class="step">01 / INPUT</span><h2>أدخل الفيديوهات</h2><p>فيديو مرجعي لنتعلم أسلوبه، ولقطاتك لصناعة النسخة الجديدة.</p></div><span class="beta">WEB BETA 01</span></div>
+ <div class="upload-grid">
+  <label class="upload-card reference-card" for="referenceInput"><input id="referenceInput" type="file" accept="video/*"><span class="upload-icon">◉</span><strong>الفيديو المرجعي</strong><small>ارفع الترند أو المونتاج الذي تريد محاكاة أسلوبه</small><span class="upload-cta">＋ اختيار فيديو مرجعي</span><div class="file-meta" id="referenceMeta">لم يتم اختيار فيديو</div></label>
+  <label class="upload-card footage-card" for="footageInput"><input id="footageInput" type="file" accept="video/*" multiple><span class="upload-icon">▧</span><strong>لقطاتك أنت</strong><small>اختر فيديو واحداً أو عدة مقاطع من هاتفك</small><span class="upload-cta">＋ إضافة لقطاتي</span><div class="file-meta" id="footageMeta">لم يتم اختيار لقطات</div></label>
+ </div>
+ <div class="preview-grid" id="previewGrid" hidden><div class="preview-panel"><div class="panel-title">الفيديو المرجعي <span id="refInfo"></span></div><video id="referencePreview" controls playsinline></video></div><div class="preview-panel"><div class="panel-title">لقطاتك <span id="clipsCount"></span></div><div class="clip-list" id="clipList"></div></div></div>
+</section>
+<section class="workspace settings-workspace">
+ <div class="section-heading"><div><span class="step">02 / STYLE</span><h2>حدد نتيجة المونتاج</h2><p>أخبر المحرك بالمدة والمنصة وطابع الفيديو.</p></div></div>
+ <div class="settings-grid">
+  <div class="setting"><label for="durationInput">مدة الفيديو النهائي</label><div class="duration-wrap"><input id="durationInput" type="number" min="5" max="300" value="30"><span>ثانية</span></div><small>من 5 إلى 300 ثانية</small></div>
+  <div class="setting"><label for="platformInput">مقاس الفيديو</label><select id="platformInput"><option value="9:16">عمودي 9:16 — TikTok / Reels</option><option value="16:9">أفقي 16:9 — YouTube</option><option value="1:1">مربع 1:1 — منشورات</option></select><small>سيتم ضبط الكادر حسب اختيارك.</small></div>
+  <div class="setting"><label for="styleInput">طابع المونتاج</label><select id="styleInput"><option value="auto">اتبع أسلوب الفيديو المرجعي</option><option value="cinematic">سينمائي وناعم</option><option value="energetic">سريع وحماسي</option><option value="minimal">نظيف وبسيط</option></select><small>الأولوية دائماً لتحليل المرجع.</small></div>
+ </div>
+ <div class="action-row"><button class="primary-btn" id="analyzeBtn"><span>✦</span> حلّل الفيديو وابنِ خطة المونتاج</button><span class="privacy">لا يتم رفع ملفاتك إلى خادم في هذه النسخة.</span></div>
+ <div class="status" id="status" role="status">بانتظار الفيديو المرجعي ولقطاتك.</div>
+</section>
+<section class="results workspace" id="results" hidden>
+ <div class="section-heading"><div><span class="step">03 / EDIT PLAN</span><h2>خطة المونتاج المقترحة</h2><p>راجع الترتيب والتوقيت قبل اعتماد أي تنفيذ.</p></div><span class="ready-label">PLAN READY</span></div>
+ <div class="analysis-grid"><div class="analysis-card"><small>مدة المرجع</small><strong id="refDuration">—</strong></div><div class="analysis-card"><small>عدد لقطاتك</small><strong id="clipTotal">—</strong></div><div class="analysis-card"><small>المدة المستهدفة</small><strong id="targetDuration">—</strong></div><div class="analysis-card"><small>أسلوب القص</small><strong id="cutStyle">—</strong></div></div>
+ <div class="timeline-head"><h3>تسلسل اللقطات</h3><span id="timelineTotal"></span></div><div class="timeline" id="timeline"></div>
+ <div class="insight-box"><span>✦</span><div><strong>ماذا حلّل الموقع؟</strong><p id="insightText"></p><small>هذه نسخة أولية: تحلل بيانات الفيديو وعينات الإطارات محلياً، ولا تدّعي بعد فهم المعنى الدلالي أو استخراج مؤثرات المرجع تلقائياً.</small></div></div>
+ <div class="action-row"><button class="secondary-btn" id="resetBtn">إعادة الاختيار</button><button class="secondary-btn" id="downloadPlanBtn">تنزيل خطة المونتاج JSON</button></div>
+</section>
+<footer><span>SMARTCUT AI</span><span>الفكرة: أنت تختار اللقطات، المحرك يتولى المونتاج.</span></footer>
+</main>
+</div>
+<dialog id="helpDialog"><button class="dialog-close" id="closeHelp">×</button><h2>كيف تجرب SmartCut؟</h2><ol><li>اختر فيديو مرجعياً يعجبك أسلوب مونتاجه.</li><li>أضف اللقطات التي تريد استخدامها.</li><li>حدد مدة الناتج والمقاس.</li><li>اضغط تحليل لإنشاء خطة أولية لترتيب اللقطات.</li></ol><p>هذه نسخة ويب تجريبية وليست بعد محرراً كاملاً يصدر فيديو نهائياً. ملفاتك لا تغادر جهازك.</p></dialog>
+<script src="./app.js"></script>
+</body></html>
