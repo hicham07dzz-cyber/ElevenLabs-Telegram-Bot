@@ -37,6 +37,11 @@ class MainActivity : ComponentActivity() {
     private lateinit var commandInput: EditText
     private lateinit var transcriptInput: EditText
     private lateinit var analysisView: TextView
+    private lateinit var apiKeyInput: EditText
+    private lateinit var chatOutput: TextView
+    private lateinit var uploadConsent: CheckBox
+    private var transcriptSegments: List<TranscriptSegment> = emptyList()
+    private var smartCuts: List<ClipRange>? = null
     private var source: File? = null
     private var music: File? = null
     private var durationMs: Long = 0L
@@ -108,6 +113,27 @@ class MainActivity : ComponentActivity() {
         analysisView = label("اختر فيديو لعرض معلوماته وتحليل عينات من الإطارات.", 13f, 0xFFB7C0CC.toInt())
         root.addView(analysisView)
 
+        section("3. Whisper والتفريغ الصوتي")
+        apiKeyInput = EditText(this).apply {
+            hint = "مفتاح Groq API — لا تضعه في GitHub أو ترسله لأحد"
+            inputType = 129
+            setTextColor(-1)
+        }
+        root.addView(apiKeyInput)
+        uploadConsent = CheckBox(this).apply {
+            text = "أوافق على إرسال نسخة الفيديو إلى خدمة Whisper لمعالجة الصوت"
+            setTextColor(0xFFCBD2DC.toInt())
+        }
+        root.addView(uploadConsent)
+        root.addView(Button(this).apply {
+            text = "تفريغ الفيديو تلقائياً بواسطة Whisper"
+            setOnClickListener { transcribeWithWhisper() }
+        })
+        root.addView(Button(this).apply {
+            text = "اكتشاف فترات الكلام وقص الصمت تلقائياً"
+            setOnClickListener { applySmartCut() }
+        })
+
         section("3. الموسيقى")
         root.addView(Button(this).apply {
             text = "اختيار ملف موسيقى"
@@ -121,6 +147,13 @@ class MainActivity : ComponentActivity() {
             setTextColor(-1)
         }
         root.addView(commandInput)
+
+        root.addView(Button(this).apply {
+            text = "إرسال الأمر إلى محرر AI وإنشاء 3 نسخ"
+            setOnClickListener { askAiEditor() }
+        })
+        chatOutput = label("ردود محرر AI ستظهر هنا.", 13f, 0xFFB7C0CC.toInt())
+        root.addView(chatOutput)
         root.addView(Button(this).apply {
             text = "فهم الأمر وتطبيق الإعدادات"
             setOnClickListener { applyLocalCommand() }
@@ -263,6 +296,91 @@ class MainActivity : ComponentActivity() {
                 retriever.release()
             }
         }
+    }
+
+
+    private fun transcribeWithWhisper() {
+        val file = source
+        val key = apiKeyInput.text.toString().trim()
+        if (file == null) { status.text = "اختر فيديو أولاً."; return }
+        if (key.isBlank()) { status.text = "أدخل مفتاح API داخل التطبيق. لا ترسله في المحادثة."; return }
+        if (!uploadConsent.isChecked) { status.text = "فعّل الموافقة قبل إرسال الفيديو إلى خدمة Whisper."; return }
+        status.text = "جارٍ إرسال الفيديو إلى Whisper..."
+        thread {
+            try {
+                val result = GroqAiService.transcribeVideo(file, key)
+                transcriptSegments = result.segments
+                smartCuts = null
+                runOnUiThread {
+                    transcriptInput.setText(result.text)
+                    status.text = "اكتمل التفريغ: ${result.segments.size} مقطعاً زمنياً."
+                    analysisView.text = "Whisper: ${result.segments.size} مقطعاً زمنياً.\n" +
+                        result.segments.take(8).joinToString("\n") {
+                            "${"%.1f".format(Locale.US, it.start)}s — ${it.text}"
+                        }
+                }
+            } catch (e: Exception) {
+                runOnUiThread { status.text = "تعذر التفريغ: ${e.message}" }
+            }
+        }
+    }
+
+    private fun applySmartCut() {
+        if (transcriptSegments.isEmpty()) {
+            status.text = "نفّذ تفريغ Whisper أولاً حتى تتوفر التوقيتات."
+            return
+        }
+        val durationSeconds = durationMs / 1000.0
+        val ranges = SmartCutPlanner.fromSpeech(transcriptSegments, durationSeconds)
+        if (ranges.isEmpty()) {
+            status.text = "لم أجد مقاطع كلام موثوقة لاقتراح القص. لم أغيّر الفيديو."
+            return
+        }
+        smartCuts = ranges
+        val kept = ranges.sumOf { it.endSeconds - it.startSeconds }
+        val removed = (durationSeconds - kept).coerceAtLeast(0.0)
+        analysisView.text = "خطة القص الذكي: ${ranges.size} مقطعاً محفوظاً.\n" +
+            "المدة الأصلية: ${"%.1f".format(Locale.US, durationSeconds)} ثانية\n" +
+            "المدة بعد حذف فترات الصمت الطويلة تقريبياً: ${"%.1f".format(Locale.US, kept)} ثانية\n" +
+            "الوقت المحذوف تقريبياً: ${"%.1f".format(Locale.US, removed)} ثانية"
+        status.text = "تم إعداد القص الذكي. راجع الخطة قبل التصدير."
+    }
+
+    private fun askAiEditor() {
+        val key = apiKeyInput.text.toString().trim()
+        val request = commandInput.text.toString().trim()
+        if (key.isBlank()) { status.text = "أدخل مفتاح API داخل التطبيق أولاً."; return }
+        if (request.isBlank()) { status.text = "اكتب ما تريد تعديله أولاً."; return }
+        chatOutput.text = "محرر AI يفكر..."
+        thread {
+            try {
+                val response = GroqAiService.chat(key, transcriptInput.text.toString(), request)
+                runOnUiThread {
+                    chatOutput.text = response
+                    status.text = "وصل رد محرر AI. راجع النسخ الثلاث."
+                }
+            } catch (e: Exception) {
+                runOnUiThread { chatOutput.text = "تعذر الاتصال بمحرر AI: ${e.message}" }
+            }
+        }
+    }
+
+    private fun captionCuesFor(ranges: List<ClipRange>): List<CaptionCue> {
+        val cues = mutableListOf<CaptionCue>()
+        var outputOffsetMs = 0L
+        for (range in ranges) {
+            for (segment in transcriptSegments) {
+                val overlapStart = maxOf(range.startSeconds, segment.start)
+                val overlapEnd = minOf(range.endSeconds, segment.end)
+                if (overlapEnd > overlapStart) {
+                    val start = outputOffsetMs + ((overlapStart - range.startSeconds) * 1000.0).toLong()
+                    val end = outputOffsetMs + ((overlapEnd - range.startSeconds) * 1000.0).toLong()
+                    cues.add(CaptionCue(start, end.coerceAtLeast(start + 250L), segment.text))
+                }
+            }
+            outputOffsetMs += ((range.endSeconds - range.startSeconds) * 1000.0).toLong()
+        }
+        return cues
     }
 
     private fun applyLocalCommand() {
