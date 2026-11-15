@@ -200,7 +200,7 @@ class MainActivity : ComponentActivity() {
         status = label("بانتظار اختيار فيديو.", 14f, 0xFFB7C0CC.toInt())
         status.setPadding(0, 18, 0, 0)
         root.addView(status)
-        root.addView(label("ملاحظة: تحليل الإطارات والمقاسات ودمج الموسيقى متاح في هذه المرحلة. تفريغ Whisper والقص الذكي الدلالي والترجمة المتزامنة تلقائياً ما زالت قيد الدمج.", 12f, 0xFF8993A2.toInt()).apply {
+        root.addView(label("ملاحظة: يتطلب التفريغ والترجمة ومحرر AI مفتاح Groq صالحاً واتصال إنترنت. القص الذكي يعتمد على توقيتات الكلام من Whisper، وليس تحليلاً دلالياً كاملاً للمشاهد. يلزم اختبار التصدير على الهاتف.", 12f, 0xFF8993A2.toInt()).apply {
             setPadding(0, 16, 0, 0)
         })
         setContentView(ScrollView(this).apply { addView(root) })
