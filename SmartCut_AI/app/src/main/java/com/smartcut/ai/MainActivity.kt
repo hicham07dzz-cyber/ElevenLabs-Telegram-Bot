@@ -40,7 +40,9 @@ class MainActivity : ComponentActivity() {
     private lateinit var apiKeyInput: EditText
     private lateinit var chatOutput: TextView
     private lateinit var uploadConsent: CheckBox
+    private lateinit var translationSpinner: Spinner
     private var transcriptSegments: List<TranscriptSegment> = emptyList()
+    private var translatedSegments: List<TranscriptSegment> = emptyList()
     private val chatHistory = mutableListOf<Pair<String, String>>()
     private var smartCuts: List<ClipRange>? = null
     private var source: File? = null
@@ -136,6 +138,15 @@ class MainActivity : ComponentActivity() {
             setOnClickListener { applySmartCut() }
         })
 
+        translationSpinner = Spinner(this)
+        translationSpinner.adapter = ArrayAdapter(this, android.R.layout.simple_spinner_dropdown_item,
+            listOf("ترجمة إلى العربية", "Translate to English"))
+        root.addView(translationSpinner)
+        root.addView(Button(this).apply {
+            text = "ترجمة المقاطع ومزامنتها مع الفيديو"
+            setOnClickListener { translateCaptions() }
+        })
+
         section("3. الموسيقى")
         root.addView(Button(this).apply {
             text = "اختيار ملف موسيقى"
@@ -210,6 +221,7 @@ class MainActivity : ComponentActivity() {
             val file = copyUriToCache(uri, "smartcut_source_video")
             source = file
             transcriptSegments = emptyList()
+            translatedSegments = emptyList()
             smartCuts = null
             transcriptInput.setText("")
             uploadConsent.isChecked = false
@@ -316,6 +328,7 @@ class MainActivity : ComponentActivity() {
             try {
                 val result = GroqAiService.transcribeVideo(file, key)
                 transcriptSegments = result.segments
+                translatedSegments = emptyList()
                 smartCuts = null
                 runOnUiThread {
                     transcriptInput.setText(result.text)
@@ -327,6 +340,33 @@ class MainActivity : ComponentActivity() {
                 }
             } catch (e: Exception) {
                 runOnUiThread { status.text = "تعذر التفريغ: ${e.message}" }
+            }
+        }
+    }
+
+
+    private fun translateCaptions() {
+        if (transcriptSegments.isEmpty()) {
+            status.text = "نفّذ Whisper أولاً قبل الترجمة."
+            return
+        }
+        val key = apiKeyInput.text.toString().trim()
+        if (key.isBlank()) {
+            status.text = "أدخل مفتاح API داخل التطبيق أولاً."
+            return
+        }
+        val target = if (translationSpinner.selectedItemPosition == 0) "Arabic" else "English"
+        status.text = "جارٍ ترجمة المقاطع مع الحفاظ على التوقيت..."
+        thread {
+            try {
+                val result = GroqAiService.translateSegments(key, transcriptSegments, target)
+                translatedSegments = result
+                runOnUiThread {
+                    analysisView.text = "تم تجهيز ترجمة ${result.size} مقطعاً إلى $target. ستظهر الترجمة داخل الفيديو عند التصدير."
+                    status.text = "اكتملت الترجمة المتزامنة."
+                }
+            } catch (e: Exception) {
+                runOnUiThread { status.text = "تعذرت الترجمة: ${e.message}" }
             }
         }
     }
@@ -378,8 +418,9 @@ class MainActivity : ComponentActivity() {
     private fun captionCuesFor(ranges: List<ClipRange>): List<CaptionCue> {
         val cues = mutableListOf<CaptionCue>()
         var outputOffsetMs = 0L
+        val captionSegments = translatedSegments.ifEmpty { transcriptSegments }
         for (range in ranges) {
-            for (segment in transcriptSegments) {
+            for (segment in captionSegments) {
                 val overlapStart = maxOf(range.startSeconds, segment.start)
                 val overlapEnd = minOf(range.endSeconds, segment.end)
                 if (overlapEnd > overlapStart) {
