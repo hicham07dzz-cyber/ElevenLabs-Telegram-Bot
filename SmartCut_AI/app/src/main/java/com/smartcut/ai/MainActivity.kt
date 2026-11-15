@@ -454,15 +454,34 @@ class MainActivity : ComponentActivity() {
         exportButton.isEnabled = false
         pickButton.isEnabled = false
         status.text = if (music == null) "جارٍ القص وتطبيق المقاس..." else "جارٍ القص ودمج الموسيقى..."
-        val clip = MediaItem.Builder().setUri(Uri.fromFile(input))
-            .setClippingConfiguration(MediaItem.ClippingConfiguration.Builder()
-                .setStartPositionMs(from).setEndPositionMs(to).build()).build()
-        val presentation = Presentation.createForAspectRatio(
-            ratio, Presentation.LAYOUT_SCALE_TO_FIT_WITH_CROP
-        )
-        val editedVideo = EditedMediaItem.Builder(clip)
-            .setEffects(Effects(emptyList(), listOf(presentation)))
-            .build()
+        val activeRanges = (smartCuts ?: listOf(ClipRange(from / 1000.0, to / 1000.0)))
+            .filter { it.endSeconds > it.startSeconds }
+        if (activeRanges.isEmpty()) {
+            status.text = "لا توجد مقاطع صالحة للتصدير."
+            exportButton.isEnabled = true
+            pickButton.isEnabled = true
+            return
+        }
+        val captionCues = captionCuesFor(activeRanges)
+        val editedVideos = activeRanges.map { range ->
+            val clip = MediaItem.Builder().setUri(Uri.fromFile(input))
+                .setClippingConfiguration(MediaItem.ClippingConfiguration.Builder()
+                    .setStartPositionMs((range.startSeconds * 1000).toLong())
+                    .setEndPositionMs((range.endSeconds * 1000).toLong()).build()).build()
+            val presentation = Presentation.createForAspectRatio(
+                ratio, Presentation.LAYOUT_SCALE_TO_FIT_WITH_CROP
+            )
+            val videoEffects = mutableListOf<androidx.media3.common.Effect>(presentation)
+            if (captionCues.isNotEmpty()) {
+                videoEffects.add(androidx.media3.effect.OverlayEffect(
+                    listOf(SmartCutCaptionOverlay(captionCues))
+                ))
+            }
+            EditedMediaItem.Builder(clip)
+                .setEffects(Effects(emptyList(), videoEffects))
+                .build()
+        }
+        val videoSequence = EditedMediaItemSequence.withAudioAndVideoFrom(editedVideos)
         val transformer = Transformer.Builder(this).addListener(object : Transformer.Listener {
             override fun onCompleted(composition: Composition, exportResult: ExportResult) {
                 try {
@@ -492,15 +511,14 @@ class MainActivity : ComponentActivity() {
         }).build()
         try {
             val selectedMusic = music
-            if (selectedMusic == null) {
-                transformer.start(editedVideo, output.absolutePath)
-            } else {
-                val videoSequence = EditedMediaItemSequence.withAudioAndVideoFrom(listOf(editedVideo))
+            val sequences = mutableListOf(videoSequence)
+            if (selectedMusic != null) {
                 val musicItem = EditedMediaItem.Builder(MediaItem.fromUri(Uri.fromFile(selectedMusic))).build()
                 val musicSequence = EditedMediaItemSequence.withAudioFrom(listOf(musicItem))
                     .buildUpon().setIsLooping(true).build()
-                transformer.start(Composition.Builder(videoSequence, musicSequence).build(), output.absolutePath)
+                sequences.add(musicSequence)
             }
+            transformer.start(Composition.Builder(sequences).build(), output.absolutePath)
         } catch (e: Exception) {
             status.text = "تعذر بدء التصدير: " + e.message
             exportButton.isEnabled = true
